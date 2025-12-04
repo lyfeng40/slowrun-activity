@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>超慢跑計時器 v11</title>
+  <style>
+    :root {
+      --bg: #111111;
+      --card: #1e1e1e;
+      --accent: #4a90e2;
+      --accent-soft: #f5a623;
+      --text-main: #f5f5f5;
+      --text-sub: #cccccc;
+      --text-light: rgba(204, 204, 204, 0.4);
+      --correct: #9bd77a;
+      --answer: #ffd54f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: var(--card);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      height: 85vh;
+      max-height: 800px;
+      position: relative;
+    }
+
+    /* 最上面：滑桿控制區 */
+    .controls-top {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid #333;
+      margin-bottom: 16px;
+    }
+
+    .control-group {
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .control-label {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      margin-bottom: 4px;
+    }
+
+    .control-value {
+      font-size: 1.1rem;
+      color: var(--accent-soft);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    input[type="range"] {
+      width: 100px;
+      height: 6px;
+      accent-color: var(--accent);
+      border-radius: 3px;
+      margin-bottom: 2px;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    /* 中間：按鈕區 */
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    button {
+      border: none;
+      border-radius: 25px;
+      padding: 12px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex: 1;
+      max-width: 110px;
+      white-space: nowrap;
+    }
+
+    #startBtn {
+      background: linear-gradient(135deg, var(--accent), #357abd);
+      color: white;
+      box-shadow: 0 4px 12px rgba(74,144,226,0.4);
+    }
+
+    #stopBtn, #musicBtn {
+      background: #444;
+      color: var(--text-main);
+    }
+
+    #musicBtn.active {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      box-shadow: 0 4px 12px rgba(76,175,80,0.4);
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    button:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+    }
+
+    /* 超大中央題目區 */
+    .math-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      min-height: 0;
+      position: relative;
+    }
+
+    #math {
+      font-size: clamp(2.5rem, 7vw, 5.5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 95%;
+      margin-bottom: 12px;
+    }
+
+    #message {
+      font-size: 1.1rem;
+      color: var(--text-sub);
+      margin-top: 8px;
+    }
+
+    /* 停止後黑底統計面板 */
+    .stats-panel {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      border: 2px solid var(--accent);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      max-width: 90%;
+      max-height: 60%;
+      z-index: 100;
+      box-sizing: border-box;
+    }
+
+    .stats-panel.show {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .stats-panel h3 {
+      margin: 0 0 0 0;
+      color: var(--accent);
+      font-size: 1.3rem;
+    }
+
+    .stat-line {
+      font-size: 1.1rem;
+      color: var(--text-main);
+      line-height: 1.4;
+      margin: 8px 0;
+    }
+
+    .stat-value {
+      color: var(--accent-soft);
+      font-weight: 700;
+      font-size: 1.4rem;
+    }
+
+    #restartBtn {
+      background: linear-gradient(135deg, var(--accent-soft), #d98c1a);
+      color: white !important;
+      margin-top: 8px;
+      padding: 14px 24px;
+      font-size: 1rem;
+      border-radius: 25px;
+      white-space: nowrap;
+    }
+
+    /* 最下面：時間 + 步數 */
+    .bottom-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-top: 1px solid #333;
+      font-size: 0.9rem;
+    }
+
+    .timer-small {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 1.3rem;
+    }
+
+    .answer { 
+      color: var(--answer) !important; 
+      animation: glow 1.5s ease-in-out infinite alternate; 
+    }
+    
+    @keyframes glow {
+      from { text-shadow: 0 0 10px var(--answer); }
+      to { text-shadow: 0 0 20px var(--answer), 0 0 30px var(--answer); }
+    }
+
+    /* 手機優化 */
+    @media (max-width: 480px) {
+      .controls-top { flex-direction: column; gap: 16px; }
+      .control-group { min-width: 200px; }
+      input[type="range"] { width: 160px; }
+      .buttons { flex-direction: column; }
+      #math { font-size: clamp(2rem, 8vw, 4rem); }
+    }
+
+    /* 隱藏YouTube播放器（只播放聲音） */
+    #youtubePlayer {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      visibility: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 隱藏YouTube播放器 - 只播放聲音 -->
+    <iframe id="youtubePlayer" 
+            src="https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
+            frameborder="0" 
+            allow="autoplay; encrypted-media;"
+            allowfullscreen>
+    </iframe>
+
+    <!-- 最上面滑桿 -->
+    <div class="controls-top">
+      <div class="control-group">
+        <div class="control-label">步頻</div>
+        <div class="control-value" id="cadenceValue">180</div>
+        <input type="range" id="cadence" min="150" max="200" value="180">
+        <div class="range-labels">
+          <span>150</span>
+          <span>200</span>
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="control-label">每題</div>
+        <div class="control-value" id="intervalValue">4秒</div>
+        <input type="range" id="interval" min="3" max="5" value="4">
+        <div class="range-labels">
+          <span>3</span>
+          <span>5</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 中間按鈕 -->
+    <div class="buttons">
+      <button id="startBtn">▶️ 開始</button>
+      <button id="stopBtn" disabled>⏹️ 停止</button>
+      <button id="musicBtn">🎵 音樂</button>
+    </div>
+
+    <!-- 中央超大題目區 -->
+    <div class="math-container">
+      <div id="math">準備開始…</div>
+      <div id="message">選擇步頻後點擊開始</div>
+      
+      <!-- 停止後黑底統計面板 -->
+      <div id="statsPanel" class="stats-panel">
+        <h3>🎉 練習完成！</h3>
+        <div class="stat-line">總時間：<span class="stat-value" id="finalTime">--</span></div>
+        <div class="stat-line">總步數：<span class="stat-value" id="finalSteps">--</span></div>
+        <button id="restartBtn">🔄 重新開始</button>
+      </div>
+    </div>
+
+    <!-- 最下面時間+步數 -->
+    <div class="bottom-stats">
+      <div class="timer-small" id="timer">00:00</div>
+      <div style="display: flex; gap: 16px; font-size: 0.85rem;">
+        <div>步數：<span id="totalSteps" style="color: var(--accent-soft);">0</span></div>
+        <div>正確：<span id="correctCount" style="color: var(--correct);">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 腳步聲 -->
+  <audio id="footstep" preload="auto">
+    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoAAAAA=" type="audio/wav">
+  </audio>
+
+  <script>
+    let timer = 0, totalSteps = 0, correctCount = 0, difficulty = 1;
+    let intervalId = null, stepInterval = 0, questionInterval = 4000;
+    let currentProblem = {}, showAnswerTimeout = null, isRunning = false;
+    let musicEnabled = false;
+    let lastStepTime = 0, lastQuestionTime = 0;
+
+    // DOM元素
+    const cadenceSlider = document.getElementById('cadence');
+    const intervalSlider = document.getElementById('interval');
+    const cadenceValue = document.getElementById('cadenceValue');
+    const intervalValue = document.getElementById('intervalValue');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const musicBtn = document.getElementById('musicBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const timerEl = document.getElementById('timer');
+    const mathEl = document.getElementById('math');
+    const msgEl = document.getElementById('message');
+    const totalStepsEl = document.getElementById('totalSteps');
+    const correctCountEl = document.getElementById('correctCount');
+    const statsPanel = document.getElementById('statsPanel');
+    const finalTimeEl = document.getElementById('finalTime');
+    const finalStepsEl = document.getElementById('finalSteps');
+    const footstepAudio = document.getElementById('footstep');
+    const youtubePlayer = document.getElementById('youtubePlayer');
+
+    // 滑桿即時更新
+    cadenceSlider.oninput = () => cadenceValue.textContent = cadenceSlider.value;
+    intervalSlider.oninput = () => intervalValue.textContent = intervalSlider.value + '秒';
+
+    // 音樂開關 - 無畫面直接播放
+    musicBtn.onclick = () => {
+      musicEnabled = !musicEnabled;
+      if (musicEnabled) {
+        musicBtn.textContent = '🔇 關音樂';
+        musicBtn.classList.add('active');
+        youtubePlayer.src = 'https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=1&controls=0&modestbranding=1&rel=0&disablekb=1';
+      } else {
+        musicBtn.textContent = '🎵 音樂';
+        musicBtn.classList.remove('active');
+        youtubePlayer.src = 'https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1';
+      }
+    };
+
+    function playFootstep() {
+      footstepAudio.currentTime = 0;
+      footstepAudio.play().catch(() => {});
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const secs = (seconds % 60).toString().padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
+
+    function updateTimer() {
+      timerEl.textContent = formatTime(timer);
+    }
+
+    function generateMathProblem() {
+      const ops = ['+', '-', '×', '÷'];
+      let a, b, op, expected;
+
+      if (difficulty <= 2) {
+        a = Math.floor(Math.random() * 10) + 1;
+        b = Math.floor(Math.random() * 10) + 1;
+        op = ops[Math.floor(Math.random() * 2)];
+      } else if (difficulty <= 4) {
+        a = Math.floor(Math.random() * 10) + 1;
+        b = Math.floor(Math.random() * 10) + 1;
+        op = ops[(difficulty - 3) + 2];
+      } else {
+        a = Math.floor(Math.random() * 90) + 10;
+        b = Math.floor(Math.random() * 90) + 10;
+        op = ops[Math.floor(Math.random() * 4)];
+      }
+
+      if (op === '+') expected = a + b;
+      else if (op === '-') expected = a - b;
+      else if (op === '×') expected = a * b;
+      else {
+        b = Math.floor(Math.random() * 9) + 1;
+        expected = Math.floor(Math.random() * 9) + 1;
+        a = b * expected;
+      }
+
+      currentProblem = {a, b, op, expected};
+      mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      msgEl.textContent = '';
+      mathEl.className = '';
+    }
+
+    function showAnswer() {
+      mathEl.innerHTML = `${currentProblem.a} ${currentProblem.op} ${currentProblem.b} = <span class="answer">${currentProblem.expected}</span>`;
+      msgEl.textContent = '記住答案！';
+      
+      showAnswerTimeout = setTimeout(generateMathProblem, 1200);
+    }
+
+    function updateStats() {
+      totalStepsEl.textContent = totalSteps;
+      correctCountEl.textContent = correctCount;
+    }
+
+    function resetGameState() {
+      timer = 0;
+      totalSteps = 0;
+      correctCount = 0;
+      difficulty = 1;
+      isRunning = false;
+      
+      if (intervalId) {
+        cancelAnimationFrame(intervalId);
+        intervalId = null;
+      }
+      if (showAnswerTimeout) {
+        clearTimeout(showAnswerTimeout);
+        showAnswerTimeout = null;
+      }
+      
+      updateStats();
+      updateTimer();
+      statsPanel.classList.remove('show');
+      mathEl.innerHTML = `準備開始…`;
+      msgEl.textContent = '滑桿調整完畢後點擊開始';
+      
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    }
+
+    function startTimer() {
+      cadence = parseInt(cadenceSlider.value);
+      questionInterval = parseInt(intervalSlider.value) * 1000;
+      stepInterval = 60000 / cadence;
+
+      resetGameState();
+      
+      isRunning = true;
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+
+      // 開始時自動播放音樂（如果已開啟）
+      if (musicEnabled) {
+        youtubePlayer.src = 'https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=1&controls=0&modestbranding=1&rel=0&disablekb=1';
+      }
+
+      generateMathProblem();
+      lastStepTime = performance.now();
+      lastQuestionTime = performance.now();
+
+      function gameLoop(currentTime) {
+        if (!isRunning) return;
+        
+        const elapsed = currentTime - lastStepTime;
+        const elapsedQuestion = currentTime - lastQuestionTime;
+        
+        if (elapsed >= stepInterval) {
+          playFootstep();
+          totalSteps++;
+          lastStepTime = currentTime;
+          updateStats();
+        }
+        
+        if (elapsedQuestion >= questionInterval) {
+          showAnswer();
+          lastQuestionTime = currentTime;
+          if (timer % 30 === 0 && difficulty < 5) difficulty++;
+        }
+        
+        const secondsElapsed = Math.floor((currentTime - gameLoop.startTime) / 1000);
+        if (secondsElapsed !== timer) {
+          timer = secondsElapsed;
+          updateTimer();
+        }
+        
+        intervalId = requestAnimationFrame(gameLoop);
+      }
+      
+      gameLoop.startTime = performance.now();
+      intervalId = requestAnimationFrame(gameLoop);
+    }
+
+    function stopTimer() {
+      if (!isRunning) return;
+      
+      isRunning = false;
+      if (intervalId) {
+        cancelAnimationFrame(intervalId);
+        intervalId = null;
+      }
+      if (showAnswerTimeout) {
+        clearTimeout(showAnswerTimeout);
+        showAnswerTimeout = null;
+      }
+      
+      // 停止時自動暫停音樂
+      if (musicEnabled) {
+        youtubePlayer.src = 'https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1';
+      }
+      
+      finalTimeEl.textContent = formatTime(timer);
+      finalStepsEl.textContent = totalSteps;
+      statsPanel.classList.add('show');
+      
+      startBtn.disabled = true;
+      stopBtn.disabled = true;
+    }
+
+    // 重新開始按鈕
+    restartBtn.onclick = startTimer;
+
+    startBtn.addEventListener('click', startTimer);
+    stopBtn.addEventListener('click', stopTimer);
+  </script>
+</body>
+</html>
