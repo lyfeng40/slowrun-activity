@@ -101,6 +101,7 @@
       justify-content: center;
       gap: 10px;
       margin: 12px 0 14px;
+      flex-wrap: wrap;
     }
 
     button {
@@ -295,7 +296,6 @@
       .controls-top { flex-direction: column; gap: 10px; }
       .control-group { min-width: 220px; }
       input[type="range"] { width: 180px; }
-      .buttons { flex-wrap: wrap; }
       .math-panel { padding: 16px 10px; }
       #math { font-size: clamp(2.2rem, 9vw, 4.2rem); }
       .stats-panel { width: 90%; }
@@ -314,6 +314,7 @@
 </head>
 <body>
   <div class="container">
+    <!-- 隱藏 YouTube 播放器（只用來放音樂） -->
     <iframe id="youtubePlayer"
       src="https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
       frameborder="0"
@@ -355,6 +356,7 @@
         <div id="message">&nbsp;</div>
       </div>
 
+      <!-- 停止面板 -->
       <div id="statsPanelStop" class="stats-panel">
         <h3 class="stats-title">🎉 練習結束</h3>
         <div class="stat-line">總時間：<span class="stat-value" id="finalTimeStop">--</span></div>
@@ -364,6 +366,7 @@
         </div>
       </div>
 
+      <!-- 暫停面板 -->
       <div id="statsPanelPause" class="stats-panel">
         <h3 class="stats-title">⏸️ 已暫停</h3>
         <div class="stat-line">目前時間：<span class="stat-value" id="finalTimePause">--</span></div>
@@ -387,26 +390,29 @@
     </div>
   </div>
 
+  <!-- 節拍器腳步聲 -->
   <audio id="footstep" preload="auto">
     <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoAAAAA=" type="audio/wav">
   </audio>
 
   <script>
-    let timer = 0;
-    let totalSteps = 0;
-    let intervalId = null;
-    let currentProblem = {};
-    let showAnswerTimeout = null;
+    // 狀態變數
+    let timer = 0;                // 累積秒數
+    let totalSteps = 0;           // 步數
+    let intervalId = null;        // requestAnimationFrame ID
+    let currentProblem = {};      // 目前題目
+    let showAnswerTimeout = null; // 顯示答案後換題的 timeout
     let isRunning = false;
     let isPaused = false;
     let musicEnabled = false;
 
-    let lastStepTime = 0;
-    let lastQuestionTime = 0;
-    let stepInterval = 60000 / 180;
-    let questionInterval = 4000;
+    // 時間控制：步頻 / 題目（都可即時調整）
     let lastLoopTime = 0;
+    let lastStepTime = 0;
+    let stepInterval = 60000 / 180; // 依步頻調整（ms）
+    let nextQuestionTime = 0;       // 下一題顯示答案時間點（以 timer 秒為單位）
 
+    // DOM
     const cadenceSlider = document.getElementById('cadence');
     const intervalSlider = document.getElementById('interval');
     const cadenceValue = document.getElementById('cadenceValue');
@@ -420,7 +426,6 @@
     const msgEl = document.getElementById('message');
     const totalStepsEl = document.getElementById('totalSteps');
     const footstepAudio = document.getElementById('footstep');
-    const youtubePlayer = document.getElementById('youtubePlayer');
 
     const statsPanelStop = document.getElementById('statsPanelStop');
     const finalTimeStopEl = document.getElementById('finalTimeStop');
@@ -433,6 +438,7 @@
     const pauseRestartBtn = document.getElementById('pauseRestartBtn');
     const resumeBtn = document.getElementById('resumeBtn');
 
+    // YouTube IFrame API
     let ytPlayer = null;
     function onYouTubeIframeAPIReady() {
       ytPlayer = new YT.Player('youtubePlayer', {});
@@ -444,6 +450,7 @@
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     })();
 
+    // 音樂按鈕（只控制是否啟用，實際播放由開始/暫停/繼續控制）
     musicBtn.onclick = () => {
       musicEnabled = !musicEnabled;
       if (musicEnabled) {
@@ -457,15 +464,17 @@
       }
     };
 
+    // 步頻滑桿：即時調整節拍器間隔
     cadenceSlider.oninput = () => {
       cadenceValue.textContent = cadenceSlider.value;
-      const cadence = parseInt(cadenceSlider.value,10);
-      stepInterval = 60000 / cadence;
+      const cadence = parseInt(cadenceSlider.value, 10);
+      stepInterval = 60000 / cadence; // ms / step
     };
 
+    // 題目秒數滑桿：只影響「下一題」的時間，實作在 generateMathProblem
     intervalSlider.oninput = () => {
       intervalValue.textContent = intervalSlider.value + '秒';
-      questionInterval = parseInt(intervalSlider.value,10) * 1000;
+      // 真正生效時間點在 generateMathProblem() 裡設定 nextQuestionTime
     };
 
     function playFootstep() {
@@ -504,31 +513,51 @@
 
     function generateMathProblem() {
       const level = getDifficultyLevelByTime(timer);
-      let a, b, c, op;
-      let expected;
+      let a, b, c, op, expected;
       const ops = ['+','-','×','÷'];
       const randInt = (min,max)=>Math.floor(Math.random()*(max-min+1))+min;
 
+      // 依照分鐘難度出題
       if (level === 1) {
         a = randInt(1,9); b = randInt(1,9); op = '+'; expected = a+b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       } else if (level === 2) {
         a = randInt(1,9); b = randInt(10,99); op = '+'; expected = a+b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       } else if (level === 3) {
         a = randInt(10,99); b = randInt(1,9); op = '+'; expected = a+b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       } else if (level === 4) {
         a = randInt(1,9); b = randInt(0,9); if (b>a)[a,b]=[b,a]; op='-'; expected=a-b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       } else if (level === 5) {
         a = randInt(1,9); b = randInt(1,9); op='-'; expected = a-b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       } else if (level === 6) {
         a = randInt(10,99); b = randInt(1,9); op='-'; expected = a-b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       } else if (level === 7) {
         a = randInt(1,9); b = randInt(10,99); op='-'; expected = a-b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       } else if (level === 8) {
         a = randInt(1,9); b = randInt(1,9); op='×'; expected = a*b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       } else if (level === 9) {
         a = randInt(10,99); b = randInt(2,9); op='×'; expected = a*b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       } else if (level === 10) {
         a = randInt(1,9); b = randInt(10,99); op='×'; expected = a*b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       } else {
         const mode = randInt(1,3);
         if (mode === 1) {
@@ -537,8 +566,6 @@
           a = b * expected;
           currentProblem = { text: `${a} ÷ ${b}`, expected };
           mathEl.innerHTML = `${currentProblem.text} = ?`;
-          msgEl.textContent = '';
-          return;
         } else if (mode === 2) {
           a = randInt(1,9);
           b = randInt(1,9);
@@ -549,8 +576,6 @@
           val = (op2==='+')?val+c:val-c;
           currentProblem = { text: `${a} ${op1} ${b} ${op2} ${c}`, expected: val };
           mathEl.innerHTML = `${currentProblem.text} = ?`;
-          msgEl.textContent = '';
-          return;
         } else {
           a = randInt(1,9);
           b = randInt(1,9);
@@ -561,14 +586,13 @@
           val = (op2==='+')?val+c:val-c;
           currentProblem = { text: `${a} ${op1} ${b} ${op2} ${c}`, expected: val };
           mathEl.innerHTML = `${currentProblem.text} = ?`;
-          msgEl.textContent = '';
-          return;
         }
       }
 
-      currentProblem = { a, b, op, expected };
-      mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       msgEl.textContent = '';
+      // 每次出新題時：重新讀滑桿，設定「下一次顯示答案的時間」
+      const qSec = parseInt(intervalSlider.value, 10);
+      nextQuestionTime = timer + qSec;
     }
 
     function showAnswer() {
@@ -577,7 +601,10 @@
       } else {
         mathEl.innerHTML = `${currentProblem.a} ${currentProblem.op} ${currentProblem.b} = <span class="answer">${currentProblem.expected}</span>`;
       }
-      showAnswerTimeout = setTimeout(generateMathProblem, 1200);
+      // 不再顯示「記住答案」
+      showAnswerTimeout = setTimeout(() => {
+        generateMathProblem();   // 這裡會重新讀滑桿，更新 nextQuestionTime
+      }, 1200);
     }
 
     function clearTimers() {
@@ -611,27 +638,36 @@
     function startLoop() {
       lastLoopTime = performance.now();
       lastStepTime = lastLoopTime;
-      lastQuestionTime = lastLoopTime;
 
-      const loop = (now)=>{
+      // 第一次「何時顯示答案」：依照目前滑桿秒數
+      const firstQSec = parseInt(intervalSlider.value, 10);
+      nextQuestionTime = timer + firstQSec;
+
+      const loop = (now) => {
         if (!isRunning || isPaused) return;
+
         const delta = now - lastLoopTime;
         if (delta >= 1000) {
-          const addSec = Math.floor(delta/1000);
+          const addSec = Math.floor(delta / 1000);
           timer += addSec;
-          lastLoopTime += addSec*1000;
+          lastLoopTime += addSec * 1000;
           updateTimer();
         }
+
+        // 節拍器：依 stepInterval，即時更新
         if (now - lastStepTime >= stepInterval) {
           playFootstep();
           totalSteps++;
           lastStepTime = now;
           updateStats();
         }
-        if (now - lastQuestionTime >= questionInterval) {
+
+        // 題目：只要 timer 達到 nextQuestionTime，就顯示答案並由 showAnswer 安排下一題
+        if (timer >= nextQuestionTime) {
           showAnswer();
-          lastQuestionTime = now;
+          nextQuestionTime = Number.MAX_SAFE_INTEGER; // 暫時鎖住，等 generateMathProblem 再設定
         }
+
         intervalId = requestAnimationFrame(loop);
       };
       intervalId = requestAnimationFrame(loop);
@@ -670,7 +706,7 @@
     }
 
     function resumeGame() {
-      if (!isRunning || !isPaused) return;
+      if (!isRunning || isPaused === false) return;
       isPaused = false;
       statsPanelPause.classList.remove('show');
 
@@ -678,7 +714,6 @@
 
       lastLoopTime = performance.now();
       lastStepTime = lastLoopTime;
-      lastQuestionTime = lastLoopTime;
       startLoop();
 
       pauseBtn.disabled = false;
@@ -702,17 +737,22 @@
       stopBtn.disabled = true;
     }
 
-    startBtn.onclick = ()=>{ if (!isRunning) startTimer(); };
-    pauseBtn.onclick = ()=>{ pauseGame(); };
-    stopBtn.onclick = ()=>{ if (isRunning || isPaused) stopAll(); };
+    // 事件
+    startBtn.onclick = () => { if (!isRunning) startTimer(); };
+    pauseBtn.onclick = () => { pauseGame(); };
+    stopBtn.onclick = () => { if (isRunning || isPaused) stopAll(); };
 
-    restartBtn.onclick = ()=>{ statsPanelStop.classList.remove('show'); startTimer(); };
-    pauseRestartBtn.onclick = ()=>{ statsPanelPause.classList.remove('show'); startTimer(); };
-    resumeBtn.onclick = ()=>{ resumeGame(); };
+    restartBtn.onclick = () => {
+      statsPanelStop.classList.remove('show');
+      startTimer();
+    };
 
-    function updateTimer(){ timerEl.textContent = formatTime(timer); }
-    function updateStats(){ totalStepsEl.textContent = totalSteps; }
+    pauseRestartBtn.onclick = () => {
+      statsPanelPause.classList.remove('show');
+      startTimer();
+    };
+
+    resumeBtn.onclick = () => { resumeGame(); };
   </script>
 </body>
 </html>
-
