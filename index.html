@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>超慢跑計時器 v11</title>
+  <title>數學超慢跑體智活動</title>
   <style>
     :root {
       --bg: #111111;
@@ -13,7 +13,6 @@
       --text-main: #f5f5f5;
       --text-sub: #cccccc;
       --text-light: rgba(204, 204, 204, 0.4);
-      --correct: #9bd77a;
       --answer: #ffd54f;
     }
 
@@ -33,31 +32,41 @@
 
     .container {
       width: 100%;
-      max-width: 500px;
+      max-width: 520px;
       background: var(--card);
       border-radius: 20px;
       padding: 24px;
       box-shadow: 0 12px 32px rgba(0,0,0,0.6);
       display: flex;
       flex-direction: column;
-      height: 85vh;
-      max-height: 800px;
+      height: 90vh;
+      max-height: 820px;
       position: relative;
     }
 
-    /* 最上面：滑桿控制區 */
+    /* 標題 */
+    .title {
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent-soft);
+      margin-bottom: 6px;
+      white-space: nowrap;
+    }
+
+    /* 最上方：滑桿控制區 */
     .controls-top {
       display: flex;
       justify-content: space-around;
       align-items: center;
-      padding: 16px 0;
+      padding: 10px 0 16px;
       border-bottom: 1px solid #333;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .control-group {
       text-align: center;
-      min-width: 120px;
+      min-width: 140px;
     }
 
     .control-label {
@@ -74,7 +83,7 @@
     }
 
     input[type="range"] {
-      width: 100px;
+      width: 120px;
       height: 6px;
       accent-color: var(--accent);
       border-radius: 3px;
@@ -93,15 +102,15 @@
     .buttons {
       display: flex;
       justify-content: center;
-      gap: 12px;
-      margin: 16px 0;
+      gap: 10px;
+      margin: 12px 0 14px;
     }
 
     button {
       border: none;
-      border-radius: 25px;
-      padding: 12px 20px;
-      font-size: 0.95rem;
+      border-radius: 22px;
+      padding: 10px 18px;
+      font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -116,7 +125,7 @@
       box-shadow: 0 4px 12px rgba(74,144,226,0.4);
     }
 
-    #stopBtn, #musicBtn {
+    #pauseBtn, #stopBtn, #musicBtn {
       background: #444;
       color: var(--text-main);
     }
@@ -136,104 +145,148 @@
       box-shadow: 0 6px 16px rgba(0,0,0,0.5);
     }
 
-    /* 超大中央題目區 */
+    /* 中央題目區 */
     .math-container {
       flex: 1;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      text-align: center;
       min-height: 0;
       position: relative;
     }
 
+    .math-panel {
+      background: rgba(0,0,0,0.2);
+      border-radius: 14px;
+      padding: 20px 16px;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+    }
+
     #math {
-      font-size: clamp(2.5rem, 7vw, 5.5rem);
+      font-size: clamp(2.6rem, 7vw, 5.2rem);
       font-weight: 800;
       line-height: 1.05;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 95%;
-      margin-bottom: 12px;
+      max-width: 100%;
+      margin-bottom: 8px;
     }
 
     #message {
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: var(--text-sub);
-      margin-top: 8px;
+      min-height: 1.2em;
     }
 
-    /* 停止後黑底統計面板 */
+    /* 停止 / 暫停 的黑底統計面板 */
     .stats-panel {
       display: none;
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.5);
+      inset: 0;
+      margin: auto;
+      width: 80%;
+      max-width: 380px;
+      height: auto;
+      background: rgba(0,0,0,0.5);
       backdrop-filter: blur(10px);
       border: 2px solid var(--accent);
       border-radius: 16px;
-      padding: 32px 24px;
+      padding: 22px 18px;
       text-align: center;
-      max-width: 90%;
-      max-height: 60%;
       z-index: 100;
       box-sizing: border-box;
-    }
-
-    .stats-panel.show {
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .stats-panel h3 {
-      margin: 0 0 0 0;
-      color: var(--accent);
-      font-size: 1.3rem;
+    .stats-panel.hidden {
+      display: none;
+    }
+
+    .stats-title {
+      margin: 0;
+      color: var(--accent-soft);
+      font-size: 1.2rem;
+      font-weight: 600;
     }
 
     .stat-line {
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: var(--text-main);
       line-height: 1.4;
-      margin: 8px 0;
+      margin: 4px 0;
     }
 
     .stat-value {
       color: var(--accent-soft);
       font-weight: 700;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
     }
 
-    #restartBtn {
-      background: linear-gradient(135deg, var(--accent-soft), #d98c1a);
-      color: white !important;
+    .stats-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
       margin-top: 8px;
-      padding: 14px 24px;
-      font-size: 1rem;
-      border-radius: 25px;
-      white-space: nowrap;
+      flex-wrap: nowrap;
     }
 
-    /* 最下面：時間 + 步數 */
+    .stats-btn {
+      flex: 1;
+      min-width: 0;
+    }
+
+    #restartBtn, #pauseRestartBtn {
+      background: linear-gradient(135deg, var(--accent-soft), #d98c1a);
+      color: white;
+    }
+
+    #resumeBtn {
+      background: linear-gradient(135deg, var(--accent), #357abd);
+      color: white;
+    }
+
+    /* 底部狀態＋作者資訊 */
+    .bottom-wrapper {
+      border-top: 1px solid #333;
+      padding-top: 8px;
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
     .bottom-stats {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 0;
-      border-top: 1px solid #333;
       font-size: 0.9rem;
     }
 
     .timer-small {
       color: var(--accent);
       font-weight: 600;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
+    }
+
+    .steps-text {
+      font-size: 0.85rem;
+      color: var(--accent-soft);
+    }
+
+    .footer {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      font-size: 0.75rem;
+      color: var(--accent-soft);
+      line-height: 1.3;
+      white-space: nowrap;
     }
 
     .answer { 
@@ -246,16 +299,17 @@
       to { text-shadow: 0 0 20px var(--answer), 0 0 30px var(--answer); }
     }
 
-    /* 手機優化 */
     @media (max-width: 480px) {
-      .controls-top { flex-direction: column; gap: 16px; }
-      .control-group { min-width: 200px; }
-      input[type="range"] { width: 160px; }
-      .buttons { flex-direction: column; }
-      #math { font-size: clamp(2rem, 8vw, 4rem); }
+      .controls-top { flex-direction: column; gap: 10px; }
+      .control-group { min-width: 220px; }
+      input[type="range"] { width: 180px; }
+      .buttons { flex-direction: row; flex-wrap: wrap; }
+      .math-panel { padding: 16px 10px; }
+      #math { font-size: clamp(2.2rem, 9vw, 4.2rem); }
+      .stats-panel { width: 90%; }
     }
 
-    /* 隱藏YouTube播放器（只播放聲音） */
+    /* 隱藏 YouTube 只留聲音 */
     #youtubePlayer {
       position: absolute;
       top: -9999px;
@@ -269,63 +323,83 @@
 </head>
 <body>
   <div class="container">
-    <!-- 隱藏YouTube播放器 - 只播放聲音 -->
-    <iframe id="youtubePlayer" 
-            src="https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
-            frameborder="0" 
-            allow="autoplay; encrypted-media;"
-            allowfullscreen>
+    <!-- 隱藏 YouTube 播放器（僅音訊） -->
+    <iframe id="youtubePlayer"
+      src="https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
+      frameborder="0"
+      allow="autoplay; encrypted-media"
+      allowfullscreen>
     </iframe>
 
-    <!-- 最上面滑桿 -->
+    <!-- 標題 -->
+    <div class="title">數學超慢跑體智活動</div>
+
+    <!-- 上方控制區 -->
     <div class="controls-top">
       <div class="control-group">
         <div class="control-label">步頻</div>
         <div class="control-value" id="cadenceValue">180</div>
         <input type="range" id="cadence" min="150" max="200" value="180">
         <div class="range-labels">
-          <span>150</span>
-          <span>200</span>
+          <span>150</span><span>200</span>
         </div>
       </div>
       <div class="control-group">
-        <div class="control-label">每題</div>
+        <div class="control-label">每題秒數</div>
         <div class="control-value" id="intervalValue">4秒</div>
-        <input type="range" id="interval" min="3" max="5" value="4">
+        <input type="range" id="interval" min="3" max="10" value="4">
         <div class="range-labels">
-          <span>3</span>
-          <span>5</span>
+          <span>3</span><span>10</span>
         </div>
       </div>
     </div>
 
-    <!-- 中間按鈕 -->
+    <!-- 按鈕列 -->
     <div class="buttons">
       <button id="startBtn">▶️ 開始</button>
+      <button id="pauseBtn" disabled>⏸️ 暫停</button>
       <button id="stopBtn" disabled>⏹️ 停止</button>
       <button id="musicBtn">🎵 音樂</button>
     </div>
 
-    <!-- 中央超大題目區 -->
+    <!-- 題目區 -->
     <div class="math-container">
-      <div id="math">準備開始…</div>
-      <div id="message">選擇步頻後點擊開始</div>
-      
-      <!-- 停止後黑底統計面板 -->
-      <div id="statsPanel" class="stats-panel">
-        <h3>🎉 練習完成！</h3>
-        <div class="stat-line">總時間：<span class="stat-value" id="finalTime">--</span></div>
-        <div class="stat-line">總步數：<span class="stat-value" id="finalSteps">--</span></div>
-        <button id="restartBtn">🔄 重新開始</button>
+      <div class="math-panel">
+        <div id="math">準備開始…</div>
+        <div id="message">&nbsp;</div>
+      </div>
+
+      <!-- 結束用統計面板（停止） -->
+      <div id="statsPanelStop" class="stats-panel hidden">
+        <h3 class="stats-title">🎉 練習結束</h3>
+        <div class="stat-line">總時間：<span class="stat-value" id="finalTimeStop">--</span></div>
+        <div class="stat-line">總步數：<span class="stat-value" id="finalStepsStop">--</span></div>
+        <div class="stats-buttons">
+          <button id="restartBtn" class="stats-btn">🔄 重新開始</button>
+        </div>
+      </div>
+
+      <!-- 暫停用統計面板 -->
+      <div id="statsPanelPause" class="stats-panel hidden">
+        <h3 class="stats-title">⏸️ 已暫停</h3>
+        <div class="stat-line">目前時間：<span class="stat-value" id="finalTimePause">--</span></div>
+        <div class="stat-line">目前步數：<span class="stat-value" id="finalStepsPause">--</span></div>
+        <div class="stats-buttons">
+          <button id="pauseRestartBtn" class="stats-btn">🔄 重新開始</button>
+          <button id="resumeBtn" class="stats-btn">▶️ 繼續</button>
+        </div>
       </div>
     </div>
 
-    <!-- 最下面時間+步數 -->
-    <div class="bottom-stats">
-      <div class="timer-small" id="timer">00:00</div>
-      <div style="display: flex; gap: 16px; font-size: 0.85rem;">
-        <div>步數：<span id="totalSteps" style="color: var(--accent-soft);">0</span></div>
-        <div>正確：<span id="correctCount" style="color: var(--correct);">0</span></div>
+    <!-- 底部區：時間＋作者資訊 -->
+    <div class="bottom-wrapper">
+      <div class="bottom-stats">
+        <div class="timer-small" id="timer">00:00</div>
+        <div class="steps-text">步數：<span id="totalSteps">0</span></div>
+      </div>
+      <div class="footer">
+        <div>製作者：FENG職能治療師</div>
+        <div>版本：V1</div>
       </div>
     </div>
   </div>
@@ -336,48 +410,84 @@
   </audio>
 
   <script>
-    let timer = 0, totalSteps = 0, correctCount = 0, difficulty = 1;
-    let intervalId = null, stepInterval = 0, questionInterval = 4000;
-    let currentProblem = {}, showAnswerTimeout = null, isRunning = false;
+    let timer = 0;
+    let totalSteps = 0;
+    let intervalId = null;
+    let stepInterval = 0;
+    let questionInterval = 4000; // ms
+    let currentProblem = {};
+    let showAnswerTimeout = null;
+    let isRunning = false;
+    let isPaused = false;
+    let lastStepTime = 0;
+    let lastQuestionTime = 0;
+    let startTime = 0;
     let musicEnabled = false;
-    let lastStepTime = 0, lastQuestionTime = 0;
 
-    // DOM元素
+    // DOM
     const cadenceSlider = document.getElementById('cadence');
     const intervalSlider = document.getElementById('interval');
     const cadenceValue = document.getElementById('cadenceValue');
     const intervalValue = document.getElementById('intervalValue');
     const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
     const stopBtn = document.getElementById('stopBtn');
     const musicBtn = document.getElementById('musicBtn');
-    const restartBtn = document.getElementById('restartBtn');
     const timerEl = document.getElementById('timer');
     const mathEl = document.getElementById('math');
     const msgEl = document.getElementById('message');
     const totalStepsEl = document.getElementById('totalSteps');
-    const correctCountEl = document.getElementById('correctCount');
-    const statsPanel = document.getElementById('statsPanel');
-    const finalTimeEl = document.getElementById('finalTime');
-    const finalStepsEl = document.getElementById('finalSteps');
     const footstepAudio = document.getElementById('footstep');
     const youtubePlayer = document.getElementById('youtubePlayer');
 
-    // 滑桿即時更新
-    cadenceSlider.oninput = () => cadenceValue.textContent = cadenceSlider.value;
-    intervalSlider.oninput = () => intervalValue.textContent = intervalSlider.value + '秒';
+    const statsPanelStop = document.getElementById('statsPanelStop');
+    const finalTimeStopEl = document.getElementById('finalTimeStop');
+    const finalStepsStopEl = document.getElementById('finalStepsStop');
+    const restartBtn = document.getElementById('restartBtn');
 
-    // 音樂開關 - 無畫面直接播放
+    const statsPanelPause = document.getElementById('statsPanelPause');
+    const finalTimePauseEl = document.getElementById('finalTimePause');
+    const finalStepsPauseEl = document.getElementById('finalStepsPause');
+    const pauseRestartBtn = document.getElementById('pauseRestartBtn');
+    const resumeBtn = document.getElementById('resumeBtn');
+
+    // YouTube IFrame API
+    let ytPlayer = null;
+    function onYouTubeIframeAPIReady() {
+      ytPlayer = new YT.Player('youtubePlayer', {
+        events: {}
+      });
+    }
+    (function loadYT() {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    })();
+
+    // 音樂按鈕：只控制「是否啟用背景音樂」
     musicBtn.onclick = () => {
       musicEnabled = !musicEnabled;
       if (musicEnabled) {
         musicBtn.textContent = '🔇 關音樂';
         musicBtn.classList.add('active');
-        youtubePlayer.src = 'https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=1&controls=0&modestbranding=1&rel=0&disablekb=1';
+        if (isRunning && ytPlayer && ytPlayer.playVideo) {
+          ytPlayer.playVideo();
+        }
       } else {
         musicBtn.textContent = '🎵 音樂';
         musicBtn.classList.remove('active');
-        youtubePlayer.src = 'https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1';
+        if (ytPlayer && ytPlayer.pauseVideo) {
+          ytPlayer.pauseVideo();
+        }
       }
+    };
+
+    cadenceSlider.oninput = () => {
+      cadenceValue.textContent = cadenceSlider.value;
+    };
+    intervalSlider.oninput = () => {
+      intervalValue.textContent = intervalSlider.value + '秒';
     };
 
     function playFootstep() {
@@ -395,58 +505,143 @@
       timerEl.textContent = formatTime(timer);
     }
 
+    function updateStats() {
+      totalStepsEl.textContent = totalSteps;
+    }
+
+    function getDifficultyLevelByTime(sec) {
+      const minute = Math.floor(sec / 60);
+      if (minute <= 0) return 1;
+      if (minute === 1) return 2;
+      if (minute === 2) return 3;
+      if (minute === 3) return 4;
+      if (minute === 4) return 5;
+      if (minute === 5) return 6;
+      if (minute === 6) return 7;
+      if (minute === 7) return 8;
+      if (minute === 8) return 9;
+      if (minute === 9) return 10;
+      return 11;
+    }
+
     function generateMathProblem() {
+      const level = getDifficultyLevelByTime(timer);
+      let a, b, c, op, expected;
       const ops = ['+', '-', '×', '÷'];
-      let a, b, op, expected;
 
-      if (difficulty <= 2) {
-        a = Math.floor(Math.random() * 10) + 1;
-        b = Math.floor(Math.random() * 10) + 1;
-        op = ops[Math.floor(Math.random() * 2)];
-      } else if (difficulty <= 4) {
-        a = Math.floor(Math.random() * 10) + 1;
-        b = Math.floor(Math.random() * 10) + 1;
-        op = ops[(difficulty - 3) + 2];
+      function randInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      if (level === 1) {
+        a = randInt(1,9);
+        b = randInt(1,9);
+        op = '+';
+        expected = a + b;
+      } else if (level === 2) {
+        a = randInt(1,9);
+        b = randInt(10,99);
+        op = '+';
+        expected = a + b;
+      } else if (level === 3) {
+        a = randInt(10,99);
+        b = randInt(1,9);
+        op = '+';
+        expected = a + b;
+      } else if (level === 4) {
+        a = randInt(1,9);
+        b = randInt(0,9);
+        if (b > a) [a,b] = [b,a];
+        op = '-';
+        expected = a - b;
+      } else if (level === 5) {
+        a = randInt(1,9);
+        b = randInt(1,9);
+        op = '-';
+        expected = a - b;
+      } else if (level === 6) {
+        a = randInt(10,99);
+        b = randInt(1,9);
+        op = '-';
+        expected = a - b;
+      } else if (level === 7) {
+        a = randInt(1,9);
+        b = randInt(10,99);
+        op = '-';
+        expected = a - b;
+      } else if (level === 8) {
+        a = randInt(1,9);
+        b = randInt(1,9);
+        op = '×';
+        expected = a * b;
+      } else if (level === 9) {
+        a = randInt(10,99);
+        b = randInt(2,9);
+        op = '×';
+        expected = a * b;
+      } else if (level === 10) {
+        a = randInt(1,9);
+        b = randInt(10,99);
+        op = '×';
+        expected = a * b;
+      } else { // level 11: 除法＋三數混合
+        const mode = randInt(1,3);
+        if (mode === 1) {
+          b = randInt(2,9);
+          expected = randInt(1,9);
+          a = b * expected;
+          op = '÷';
+        } else if (mode === 2) {
+          a = randInt(1,9);
+          b = randInt(1,9);
+          c = randInt(1,9);
+          const op1 = ops[randInt(0,1)];
+          const op2 = ops[randInt(0,1)];
+          let exprText = `${a} ${op1} ${b} ${op2} ${c}`;
+          let val = 0;
+          if (op1 === '+') val = a + b; else val = a - b;
+          if (op2 === '+') val = val + c; else val = val - c;
+          currentProblem = { text: exprText, expected: val };
+          mathEl.innerHTML = `${exprText} = ?`;
+          msgEl.textContent = '';
+          return;
+        } else {
+          a = randInt(1,9);
+          b = randInt(1,9);
+          c = randInt(1,9);
+          const op1 = '×';
+          const op2 = randInt(0,1) ? '+' : '-';
+          let exprText = `${a} ${op1} ${b} ${op2} ${c}`;
+          let val = a * b;
+          if (op2 === '+') val = val + c; else val = val - c;
+          currentProblem = { text: exprText, expected: val };
+          mathEl.innerHTML = `${exprText} = ?`;
+          msgEl.textContent = '';
+          return;
+        }
+      }
+
+      currentProblem = { a, b, op, expected };
+      if (currentProblem.text) {
+        mathEl.innerHTML = `${currentProblem.text} = ?`;
       } else {
-        a = Math.floor(Math.random() * 90) + 10;
-        b = Math.floor(Math.random() * 90) + 10;
-        op = ops[Math.floor(Math.random() * 4)];
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       }
-
-      if (op === '+') expected = a + b;
-      else if (op === '-') expected = a - b;
-      else if (op === '×') expected = a * b;
-      else {
-        b = Math.floor(Math.random() * 9) + 1;
-        expected = Math.floor(Math.random() * 9) + 1;
-        a = b * expected;
-      }
-
-      currentProblem = {a, b, op, expected};
-      mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       msgEl.textContent = '';
       mathEl.className = '';
     }
 
     function showAnswer() {
-      mathEl.innerHTML = `${currentProblem.a} ${currentProblem.op} ${currentProblem.b} = <span class="answer">${currentProblem.expected}</span>`;
-      msgEl.textContent = '記住答案！';
-      
+      if (currentProblem.text !== undefined) {
+        mathEl.innerHTML = `${currentProblem.text} = <span class="answer">${currentProblem.expected}</span>`;
+      } else {
+        mathEl.innerHTML = `${currentProblem.a} ${currentProblem.op} ${currentProblem.b} = <span class="answer">${currentProblem.expected}</span>`;
+      }
+      // 不再顯示「記住答案」
       showAnswerTimeout = setTimeout(generateMathProblem, 1200);
     }
 
-    function updateStats() {
-      totalStepsEl.textContent = totalSteps;
-      correctCountEl.textContent = correctCount;
-    }
-
-    function resetGameState() {
-      timer = 0;
-      totalSteps = 0;
-      correctCount = 0;
-      difficulty = 1;
-      isRunning = false;
-      
+    function clearTimers() {
       if (intervalId) {
         cancelAnimationFrame(intervalId);
         intervalId = null;
@@ -455,100 +650,195 @@
         clearTimeout(showAnswerTimeout);
         showAnswerTimeout = null;
       }
-      
-      updateStats();
+    }
+
+    function resetGameState() {
+      clearTimers();
+      timer = 0;
+      totalSteps = 0;
+      isRunning = false;
+      isPaused = false;
       updateTimer();
-      statsPanel.classList.remove('show');
-      mathEl.innerHTML = `準備開始…`;
-      msgEl.textContent = '滑桿調整完畢後點擊開始';
-      
+      updateStats();
+      mathEl.innerHTML = '準備開始…';
+      msgEl.textContent = ' ';
+      statsPanelStop.classList.add('hidden');
+      statsPanelPause.classList.add('hidden');
       startBtn.disabled = false;
+      pauseBtn.disabled = true;
       stopBtn.disabled = true;
     }
 
     function startTimer() {
-      cadence = parseInt(cadenceSlider.value);
-      questionInterval = parseInt(intervalSlider.value) * 1000;
+      const cadence = parseInt(cadenceSlider.value,10);
+      questionInterval = parseInt(intervalSlider.value,10) * 1000;
       stepInterval = 60000 / cadence;
 
       resetGameState();
-      
       isRunning = true;
       startBtn.disabled = true;
+      pauseBtn.disabled = false;
       stopBtn.disabled = false;
 
-      // 開始時自動播放音樂（如果已開啟）
-      if (musicEnabled) {
-        youtubePlayer.src = 'https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=1&controls=0&modestbranding=1&rel=0&disablekb=1';
+      // 音樂
+      if (musicEnabled && ytPlayer && ytPlayer.playVideo) {
+        ytPlayer.seekTo(0, true);
+        ytPlayer.playVideo();
       }
 
       generateMathProblem();
-      lastStepTime = performance.now();
-      lastQuestionTime = performance.now();
+      startTime = performance.now();
+      lastStepTime = startTime;
+      lastQuestionTime = startTime;
 
-      function gameLoop(currentTime) {
-        if (!isRunning) return;
-        
-        const elapsed = currentTime - lastStepTime;
-        const elapsedQuestion = currentTime - lastQuestionTime;
-        
-        if (elapsed >= stepInterval) {
-          playFootstep();
-          totalSteps++;
-          lastStepTime = currentTime;
-          updateStats();
-        }
-        
-        if (elapsedQuestion >= questionInterval) {
-          showAnswer();
-          lastQuestionTime = currentTime;
-          if (timer % 30 === 0 && difficulty < 5) difficulty++;
-        }
-        
-        const secondsElapsed = Math.floor((currentTime - gameLoop.startTime) / 1000);
-        if (secondsElapsed !== timer) {
-          timer = secondsElapsed;
+      function loop(now) {
+        if (!isRunning || isPaused) return;
+
+        const elapsedFromStart = now - startTime;
+        const newSec = Math.floor(elapsedFromStart / 1000);
+        if (newSec !== timer) {
+          timer = newSec;
           updateTimer();
         }
-        
-        intervalId = requestAnimationFrame(gameLoop);
+
+        if (now - lastStepTime >= stepInterval) {
+          playFootstep();
+          totalSteps++;
+          lastStepTime = now;
+          updateStats();
+        }
+
+        if (now - lastQuestionTime >= questionInterval) {
+          showAnswer();
+          lastQuestionTime = now;
+        }
+
+        intervalId = requestAnimationFrame(loop);
       }
-      
-      gameLoop.startTime = performance.now();
-      intervalId = requestAnimationFrame(gameLoop);
+      intervalId = requestAnimationFrame(loop);
     }
 
-    function stopTimer() {
-      if (!isRunning) return;
-      
+    function stopAll(reason) {
       isRunning = false;
-      if (intervalId) {
-        cancelAnimationFrame(intervalId);
-        intervalId = null;
+      isPaused = false;
+      clearTimers();
+
+      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) {
+        ytPlayer.pauseVideo();
       }
-      if (showAnswerTimeout) {
-        clearTimeout(showAnswerTimeout);
-        showAnswerTimeout = null;
+
+      if (reason === 'stop') {
+        finalTimeStopEl.textContent = formatTime(timer);
+        finalStepsStopEl.textContent = totalSteps;
+        statsPanelStop.classList.remove('hidden');
+        statsPanelPause.classList.add('hidden');
+      } else if (reason === 'pause') {
+        finalTimePauseEl.textContent = formatTime(timer);
+        finalStepsPauseEl.textContent = totalSteps;
+        statsPanelPause.classList.remove('hidden');
+        statsPanelStop.classList.add('hidden');
       }
-      
-      // 停止時自動暫停音樂
-      if (musicEnabled) {
-        youtubePlayer.src = 'https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1';
-      }
-      
-      finalTimeEl.textContent = formatTime(timer);
-      finalStepsEl.textContent = totalSteps;
-      statsPanel.classList.add('show');
-      
+
       startBtn.disabled = true;
+      pauseBtn.disabled = true;
       stopBtn.disabled = true;
     }
 
-    // 重新開始按鈕
-    restartBtn.onclick = startTimer;
+    function pauseGame() {
+      if (!isRunning || isPaused) return;
+      isPaused = true;
+      clearTimers();
 
-    startBtn.addEventListener('click', startTimer);
-    stopBtn.addEventListener('click', stopTimer);
+      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) {
+        ytPlayer.pauseVideo();
+      }
+
+      finalTimePauseEl.textContent = formatTime(timer);
+      finalStepsPauseEl.textContent = totalSteps;
+      statsPanelPause.classList.remove('hidden');
+
+      pauseBtn.disabled = true;
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+    }
+
+    function resumeGame() {
+      if (!isRunning || !isPaused) return;
+      isPaused = false;
+      statsPanelPause.classList.add('hidden');
+
+      const cadence = parseInt(cadenceSlider.value,10);
+      questionInterval = parseInt(intervalSlider.value,10) * 1000;
+      stepInterval = 60000 / cadence;
+
+      const baseTime = performance.now() - timer * 1000;
+      startTime = baseTime;
+      lastStepTime = performance.now();
+      lastQuestionTime = performance.now();
+
+      if (musicEnabled && ytPlayer && ytPlayer.playVideo) {
+        ytPlayer.playVideo();
+      }
+
+      function loop(now) {
+        if (!isRunning || isPaused) return;
+
+        const elapsedFromStart = now - startTime;
+        const newSec = Math.floor(elapsedFromStart / 1000);
+        if (newSec !== timer) {
+          timer = newSec;
+          updateTimer();
+        }
+
+        if (now - lastStepTime >= stepInterval) {
+          playFootstep();
+          totalSteps++;
+          lastStepTime = now;
+          updateStats();
+        }
+
+        if (now - lastQuestionTime >= questionInterval) {
+          showAnswer();
+          lastQuestionTime = now;
+        }
+
+        intervalId = requestAnimationFrame(loop);
+      }
+      intervalId = requestAnimationFrame(loop);
+
+      pauseBtn.disabled = false;
+      stopBtn.disabled = false;
+    }
+
+    // 事件綁定
+    startBtn.addEventListener('click', () => {
+      isRunning = true;
+      startTimer();
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      if (!isRunning) return;
+      pauseGame();
+    });
+
+    stopBtn.addEventListener('click', () => {
+      if (!isRunning && !isPaused) return;
+      stopAll('stop');
+    });
+
+    restartBtn.addEventListener('click', () => {
+      statsPanelStop.classList.add('hidden');
+      startTimer();
+    });
+
+    pauseRestartBtn.addEventListener('click', () => {
+      statsPanelPause.classList.add('hidden');
+      startTimer();
+    });
+
+    resumeBtn.addEventListener('click', () => {
+      resumeGame();
+    });
   </script>
 </body>
 </html>
