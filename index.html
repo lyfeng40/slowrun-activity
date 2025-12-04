@@ -44,7 +44,6 @@
       position: relative;
     }
 
-    /* 標題 */
     .title {
       text-align: center;
       font-size: 1.1rem;
@@ -54,7 +53,6 @@
       white-space: nowrap;
     }
 
-    /* 最上方：滑桿控制區 */
     .controls-top {
       display: flex;
       justify-content: space-around;
@@ -98,7 +96,6 @@
       margin-top: 2px;
     }
 
-    /* 中間：按鈕區 */
     .buttons {
       display: flex;
       justify-content: center;
@@ -145,7 +142,6 @@
       box-shadow: 0 6px 16px rgba(0,0,0,0.5);
     }
 
-    /* 中央題目區 */
     .math-container {
       flex: 1;
       display: flex;
@@ -181,15 +177,12 @@
       min-height: 1.2em;
     }
 
-    /* 停止 / 暫停 的黑底統計面板 */
     .stats-panel {
-      display: none;
       position: absolute;
       inset: 0;
       margin: auto;
       width: 80%;
       max-width: 380px;
-      height: auto;
       background: rgba(0,0,0,0.5);
       backdrop-filter: blur(10px);
       border: 2px solid var(--accent);
@@ -198,14 +191,14 @@
       text-align: center;
       z-index: 100;
       box-sizing: border-box;
-      display: flex;
+      display: none;
       flex-direction: column;
       justify-content: center;
       gap: 10px;
     }
 
-    .stats-panel.hidden {
-      display: none;
+    .stats-panel.show {
+      display: flex;
     }
 
     .stats-title {
@@ -251,7 +244,6 @@
       color: white;
     }
 
-    /* 底部狀態＋作者資訊 */
     .bottom-wrapper {
       border-top: 1px solid #333;
       padding-top: 8px;
@@ -303,13 +295,12 @@
       .controls-top { flex-direction: column; gap: 10px; }
       .control-group { min-width: 220px; }
       input[type="range"] { width: 180px; }
-      .buttons { flex-direction: row; flex-wrap: wrap; }
+      .buttons { flex-wrap: wrap; }
       .math-panel { padding: 16px 10px; }
       #math { font-size: clamp(2.2rem, 9vw, 4.2rem); }
       .stats-panel { width: 90%; }
     }
 
-    /* 隱藏 YouTube 只留聲音 */
     #youtubePlayer {
       position: absolute;
       top: -9999px;
@@ -323,7 +314,6 @@
 </head>
 <body>
   <div class="container">
-    <!-- 隱藏 YouTube 播放器（僅音訊） -->
     <iframe id="youtubePlayer"
       src="https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
       frameborder="0"
@@ -331,10 +321,8 @@
       allowfullscreen>
     </iframe>
 
-    <!-- 標題 -->
     <div class="title">數學超慢跑體智活動</div>
 
-    <!-- 上方控制區 -->
     <div class="controls-top">
       <div class="control-group">
         <div class="control-label">步頻</div>
@@ -354,7 +342,6 @@
       </div>
     </div>
 
-    <!-- 按鈕列 -->
     <div class="buttons">
       <button id="startBtn">▶️ 開始</button>
       <button id="pauseBtn" disabled>⏸️ 暫停</button>
@@ -362,15 +349,13 @@
       <button id="musicBtn">🎵 音樂</button>
     </div>
 
-    <!-- 題目區 -->
     <div class="math-container">
       <div class="math-panel">
         <div id="math">準備開始…</div>
         <div id="message">&nbsp;</div>
       </div>
 
-      <!-- 結束用統計面板（停止） -->
-      <div id="statsPanelStop" class="stats-panel hidden">
+      <div id="statsPanelStop" class="stats-panel">
         <h3 class="stats-title">🎉 練習結束</h3>
         <div class="stat-line">總時間：<span class="stat-value" id="finalTimeStop">--</span></div>
         <div class="stat-line">總步數：<span class="stat-value" id="finalStepsStop">--</span></div>
@@ -379,8 +364,7 @@
         </div>
       </div>
 
-      <!-- 暫停用統計面板 -->
-      <div id="statsPanelPause" class="stats-panel hidden">
+      <div id="statsPanelPause" class="stats-panel">
         <h3 class="stats-title">⏸️ 已暫停</h3>
         <div class="stat-line">目前時間：<span class="stat-value" id="finalTimePause">--</span></div>
         <div class="stat-line">目前步數：<span class="stat-value" id="finalStepsPause">--</span></div>
@@ -391,7 +375,6 @@
       </div>
     </div>
 
-    <!-- 底部區：時間＋作者資訊 -->
     <div class="bottom-wrapper">
       <div class="bottom-stats">
         <div class="timer-small" id="timer">00:00</div>
@@ -404,7 +387,6 @@
     </div>
   </div>
 
-  <!-- 腳步聲 -->
   <audio id="footstep" preload="auto">
     <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoAAAAA=" type="audio/wav">
   </audio>
@@ -413,18 +395,18 @@
     let timer = 0;
     let totalSteps = 0;
     let intervalId = null;
-    let stepInterval = 0;
-    let questionInterval = 4000; // ms
     let currentProblem = {};
     let showAnswerTimeout = null;
     let isRunning = false;
     let isPaused = false;
-    let lastStepTime = 0;
-    let lastQuestionTime = 0;
-    let startTime = 0;
     let musicEnabled = false;
 
-    // DOM
+    let lastStepTime = 0;
+    let lastQuestionTime = 0;
+    let stepInterval = 60000 / 180;
+    let questionInterval = 4000;
+    let lastLoopTime = 0;
+
     const cadenceSlider = document.getElementById('cadence');
     const intervalSlider = document.getElementById('interval');
     const cadenceValue = document.getElementById('cadenceValue');
@@ -451,12 +433,9 @@
     const pauseRestartBtn = document.getElementById('pauseRestartBtn');
     const resumeBtn = document.getElementById('resumeBtn');
 
-    // YouTube IFrame API
     let ytPlayer = null;
     function onYouTubeIframeAPIReady() {
-      ytPlayer = new YT.Player('youtubePlayer', {
-        events: {}
-      });
+      ytPlayer = new YT.Player('youtubePlayer', {});
     }
     (function loadYT() {
       const tag = document.createElement('script');
@@ -465,40 +444,39 @@
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     })();
 
-    // 音樂按鈕：只控制「是否啟用背景音樂」
     musicBtn.onclick = () => {
       musicEnabled = !musicEnabled;
       if (musicEnabled) {
         musicBtn.textContent = '🔇 關音樂';
         musicBtn.classList.add('active');
-        if (isRunning && ytPlayer && ytPlayer.playVideo) {
-          ytPlayer.playVideo();
-        }
+        if (isRunning && ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
       } else {
         musicBtn.textContent = '🎵 音樂';
         musicBtn.classList.remove('active');
-        if (ytPlayer && ytPlayer.pauseVideo) {
-          ytPlayer.pauseVideo();
-        }
+        if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
       }
     };
 
     cadenceSlider.oninput = () => {
       cadenceValue.textContent = cadenceSlider.value;
+      const cadence = parseInt(cadenceSlider.value,10);
+      stepInterval = 60000 / cadence;
     };
+
     intervalSlider.oninput = () => {
       intervalValue.textContent = intervalSlider.value + '秒';
+      questionInterval = parseInt(intervalSlider.value,10) * 1000;
     };
 
     function playFootstep() {
       footstepAudio.currentTime = 0;
-      footstepAudio.play().catch(() => {});
+      footstepAudio.play().catch(()=>{});
     }
 
     function formatTime(seconds) {
-      const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-      const secs = (seconds % 60).toString().padStart(2, '0');
-      return `${mins}:${secs}`;
+      const m = Math.floor(seconds / 60).toString().padStart(2,'0');
+      const s = (seconds % 60).toString().padStart(2,'0');
+      return `${m}:${s}`;
     }
 
     function updateTimer() {
@@ -526,83 +504,51 @@
 
     function generateMathProblem() {
       const level = getDifficultyLevelByTime(timer);
-      let a, b, c, op, expected;
-      const ops = ['+', '-', '×', '÷'];
-
-      function randInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-      }
+      let a, b, c, op;
+      let expected;
+      const ops = ['+','-','×','÷'];
+      const randInt = (min,max)=>Math.floor(Math.random()*(max-min+1))+min;
 
       if (level === 1) {
-        a = randInt(1,9);
-        b = randInt(1,9);
-        op = '+';
-        expected = a + b;
+        a = randInt(1,9); b = randInt(1,9); op = '+'; expected = a+b;
       } else if (level === 2) {
-        a = randInt(1,9);
-        b = randInt(10,99);
-        op = '+';
-        expected = a + b;
+        a = randInt(1,9); b = randInt(10,99); op = '+'; expected = a+b;
       } else if (level === 3) {
-        a = randInt(10,99);
-        b = randInt(1,9);
-        op = '+';
-        expected = a + b;
+        a = randInt(10,99); b = randInt(1,9); op = '+'; expected = a+b;
       } else if (level === 4) {
-        a = randInt(1,9);
-        b = randInt(0,9);
-        if (b > a) [a,b] = [b,a];
-        op = '-';
-        expected = a - b;
+        a = randInt(1,9); b = randInt(0,9); if (b>a)[a,b]=[b,a]; op='-'; expected=a-b;
       } else if (level === 5) {
-        a = randInt(1,9);
-        b = randInt(1,9);
-        op = '-';
-        expected = a - b;
+        a = randInt(1,9); b = randInt(1,9); op='-'; expected = a-b;
       } else if (level === 6) {
-        a = randInt(10,99);
-        b = randInt(1,9);
-        op = '-';
-        expected = a - b;
+        a = randInt(10,99); b = randInt(1,9); op='-'; expected = a-b;
       } else if (level === 7) {
-        a = randInt(1,9);
-        b = randInt(10,99);
-        op = '-';
-        expected = a - b;
+        a = randInt(1,9); b = randInt(10,99); op='-'; expected = a-b;
       } else if (level === 8) {
-        a = randInt(1,9);
-        b = randInt(1,9);
-        op = '×';
-        expected = a * b;
+        a = randInt(1,9); b = randInt(1,9); op='×'; expected = a*b;
       } else if (level === 9) {
-        a = randInt(10,99);
-        b = randInt(2,9);
-        op = '×';
-        expected = a * b;
+        a = randInt(10,99); b = randInt(2,9); op='×'; expected = a*b;
       } else if (level === 10) {
-        a = randInt(1,9);
-        b = randInt(10,99);
-        op = '×';
-        expected = a * b;
-      } else { // level 11: 除法＋三數混合
+        a = randInt(1,9); b = randInt(10,99); op='×'; expected = a*b;
+      } else {
         const mode = randInt(1,3);
         if (mode === 1) {
           b = randInt(2,9);
           expected = randInt(1,9);
           a = b * expected;
-          op = '÷';
+          currentProblem = { text: `${a} ÷ ${b}`, expected };
+          mathEl.innerHTML = `${currentProblem.text} = ?`;
+          msgEl.textContent = '';
+          return;
         } else if (mode === 2) {
           a = randInt(1,9);
           b = randInt(1,9);
           c = randInt(1,9);
           const op1 = ops[randInt(0,1)];
           const op2 = ops[randInt(0,1)];
-          let exprText = `${a} ${op1} ${b} ${op2} ${c}`;
-          let val = 0;
-          if (op1 === '+') val = a + b; else val = a - b;
-          if (op2 === '+') val = val + c; else val = val - c;
-          currentProblem = { text: exprText, expected: val };
-          mathEl.innerHTML = `${exprText} = ?`;
+          let val = (op1==='+')?a+b:a-b;
+          val = (op2==='+')?val+c:val-c;
+          currentProblem = { text: `${a} ${op1} ${b} ${op2} ${c}`, expected: val };
+          mathEl.innerHTML = `${currentProblem.text} = ?`;
           msgEl.textContent = '';
           return;
         } else {
@@ -610,25 +556,19 @@
           b = randInt(1,9);
           c = randInt(1,9);
           const op1 = '×';
-          const op2 = randInt(0,1) ? '+' : '-';
-          let exprText = `${a} ${op1} ${b} ${op2} ${c}`;
-          let val = a * b;
-          if (op2 === '+') val = val + c; else val = val - c;
-          currentProblem = { text: exprText, expected: val };
-          mathEl.innerHTML = `${exprText} = ?`;
+          const op2 = randInt(0,1)?'+':'-';
+          let val = a*b;
+          val = (op2==='+')?val+c:val-c;
+          currentProblem = { text: `${a} ${op1} ${b} ${op2} ${c}`, expected: val };
+          mathEl.innerHTML = `${currentProblem.text} = ?`;
           msgEl.textContent = '';
           return;
         }
       }
 
       currentProblem = { a, b, op, expected };
-      if (currentProblem.text) {
-        mathEl.innerHTML = `${currentProblem.text} = ?`;
-      } else {
-        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
-      }
+      mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       msgEl.textContent = '';
-      mathEl.className = '';
     }
 
     function showAnswer() {
@@ -637,7 +577,6 @@
       } else {
         mathEl.innerHTML = `${currentProblem.a} ${currentProblem.op} ${currentProblem.b} = <span class="answer">${currentProblem.expected}</span>`;
       }
-      // 不再顯示「記住答案」
       showAnswerTimeout = setTimeout(generateMathProblem, 1200);
     }
 
@@ -662,86 +601,56 @@
       updateStats();
       mathEl.innerHTML = '準備開始…';
       msgEl.textContent = ' ';
-      statsPanelStop.classList.add('hidden');
-      statsPanelPause.classList.add('hidden');
+      statsPanelStop.classList.remove('show');
+      statsPanelPause.classList.remove('show');
       startBtn.disabled = false;
       pauseBtn.disabled = true;
       stopBtn.disabled = true;
     }
 
-    function startTimer() {
-      const cadence = parseInt(cadenceSlider.value,10);
-      questionInterval = parseInt(intervalSlider.value,10) * 1000;
-      stepInterval = 60000 / cadence;
+    function startLoop() {
+      lastLoopTime = performance.now();
+      lastStepTime = lastLoopTime;
+      lastQuestionTime = lastLoopTime;
 
-      resetGameState();
-      isRunning = true;
-      startBtn.disabled = true;
-      pauseBtn.disabled = false;
-      stopBtn.disabled = false;
-
-      // 音樂
-      if (musicEnabled && ytPlayer && ytPlayer.playVideo) {
-        ytPlayer.seekTo(0, true);
-        ytPlayer.playVideo();
-      }
-
-      generateMathProblem();
-      startTime = performance.now();
-      lastStepTime = startTime;
-      lastQuestionTime = startTime;
-
-      function loop(now) {
+      const loop = (now)=>{
         if (!isRunning || isPaused) return;
-
-        const elapsedFromStart = now - startTime;
-        const newSec = Math.floor(elapsedFromStart / 1000);
-        if (newSec !== timer) {
-          timer = newSec;
+        const delta = now - lastLoopTime;
+        if (delta >= 1000) {
+          const addSec = Math.floor(delta/1000);
+          timer += addSec;
+          lastLoopTime += addSec*1000;
           updateTimer();
         }
-
         if (now - lastStepTime >= stepInterval) {
           playFootstep();
           totalSteps++;
           lastStepTime = now;
           updateStats();
         }
-
         if (now - lastQuestionTime >= questionInterval) {
           showAnswer();
           lastQuestionTime = now;
         }
-
         intervalId = requestAnimationFrame(loop);
-      }
+      };
       intervalId = requestAnimationFrame(loop);
     }
 
-    function stopAll(reason) {
-      isRunning = false;
-      isPaused = false;
-      clearTimers();
-
-      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) {
-        ytPlayer.pauseVideo();
-      }
-
-      if (reason === 'stop') {
-        finalTimeStopEl.textContent = formatTime(timer);
-        finalStepsStopEl.textContent = totalSteps;
-        statsPanelStop.classList.remove('hidden');
-        statsPanelPause.classList.add('hidden');
-      } else if (reason === 'pause') {
-        finalTimePauseEl.textContent = formatTime(timer);
-        finalStepsPauseEl.textContent = totalSteps;
-        statsPanelPause.classList.remove('hidden');
-        statsPanelStop.classList.add('hidden');
-      }
-
+    function startTimer() {
+      resetGameState();
+      isRunning = true;
       startBtn.disabled = true;
-      pauseBtn.disabled = true;
-      stopBtn.disabled = true;
+      pauseBtn.disabled = false;
+      stopBtn.disabled = false;
+
+      if (musicEnabled && ytPlayer && ytPlayer.playVideo) {
+        ytPlayer.seekTo(0, true);
+        ytPlayer.playVideo();
+      }
+
+      generateMathProblem();
+      startLoop();
     }
 
     function pauseGame() {
@@ -749,13 +658,11 @@
       isPaused = true;
       clearTimers();
 
-      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) {
-        ytPlayer.pauseVideo();
-      }
+      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
 
       finalTimePauseEl.textContent = formatTime(timer);
       finalStepsPauseEl.textContent = totalSteps;
-      statsPanelPause.classList.remove('hidden');
+      statsPanelPause.classList.add('show');
 
       pauseBtn.disabled = true;
       startBtn.disabled = true;
@@ -765,80 +672,47 @@
     function resumeGame() {
       if (!isRunning || !isPaused) return;
       isPaused = false;
-      statsPanelPause.classList.add('hidden');
+      statsPanelPause.classList.remove('show');
 
-      const cadence = parseInt(cadenceSlider.value,10);
-      questionInterval = parseInt(intervalSlider.value,10) * 1000;
-      stepInterval = 60000 / cadence;
+      if (musicEnabled && ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
 
-      const baseTime = performance.now() - timer * 1000;
-      startTime = baseTime;
-      lastStepTime = performance.now();
-      lastQuestionTime = performance.now();
-
-      if (musicEnabled && ytPlayer && ytPlayer.playVideo) {
-        ytPlayer.playVideo();
-      }
-
-      function loop(now) {
-        if (!isRunning || isPaused) return;
-
-        const elapsedFromStart = now - startTime;
-        const newSec = Math.floor(elapsedFromStart / 1000);
-        if (newSec !== timer) {
-          timer = newSec;
-          updateTimer();
-        }
-
-        if (now - lastStepTime >= stepInterval) {
-          playFootstep();
-          totalSteps++;
-          lastStepTime = now;
-          updateStats();
-        }
-
-        if (now - lastQuestionTime >= questionInterval) {
-          showAnswer();
-          lastQuestionTime = now;
-        }
-
-        intervalId = requestAnimationFrame(loop);
-      }
-      intervalId = requestAnimationFrame(loop);
+      lastLoopTime = performance.now();
+      lastStepTime = lastLoopTime;
+      lastQuestionTime = lastLoopTime;
+      startLoop();
 
       pauseBtn.disabled = false;
       stopBtn.disabled = false;
     }
 
-    // 事件綁定
-    startBtn.addEventListener('click', () => {
-      isRunning = true;
-      startTimer();
-    });
+    function stopAll() {
+      clearTimers();
+      isRunning = false;
+      isPaused = false;
 
-    pauseBtn.addEventListener('click', () => {
-      if (!isRunning) return;
-      pauseGame();
-    });
+      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
 
-    stopBtn.addEventListener('click', () => {
-      if (!isRunning && !isPaused) return;
-      stopAll('stop');
-    });
+      finalTimeStopEl.textContent = formatTime(timer);
+      finalStepsStopEl.textContent = totalSteps;
+      statsPanelStop.classList.add('show');
+      statsPanelPause.classList.remove('show');
 
-    restartBtn.addEventListener('click', () => {
-      statsPanelStop.classList.add('hidden');
-      startTimer();
-    });
+      startBtn.disabled = true;
+      pauseBtn.disabled = true;
+      stopBtn.disabled = true;
+    }
 
-    pauseRestartBtn.addEventListener('click', () => {
-      statsPanelPause.classList.add('hidden');
-      startTimer();
-    });
+    startBtn.onclick = ()=>{ if (!isRunning) startTimer(); };
+    pauseBtn.onclick = ()=>{ pauseGame(); };
+    stopBtn.onclick = ()=>{ if (isRunning || isPaused) stopAll(); };
 
-    resumeBtn.addEventListener('click', () => {
-      resumeGame();
-    });
+    restartBtn.onclick = ()=>{ statsPanelStop.classList.remove('show'); startTimer(); };
+    pauseRestartBtn.onclick = ()=>{ statsPanelPause.classList.remove('show'); startTimer(); };
+    resumeBtn.onclick = ()=>{ resumeGame(); };
+
+    function updateTimer(){ timerEl.textContent = formatTime(timer); }
+    function updateStats(){ totalStepsEl.textContent = totalSteps; }
   </script>
 </body>
 </html>
+
