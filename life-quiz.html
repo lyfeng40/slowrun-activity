@@ -168,16 +168,15 @@
       min-height: 1.2em;
     }
 
-    #math {
-      font-size: clamp(2.6rem, 7vw, 5.2rem);
-      font-weight: 800;
-      line-height: 1.05;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
-      margin-bottom: 8px;
-    }
+#math {
+  font-size: clamp(2.6rem, 7vw, 5.2rem);
+  font-weight: 800;
+  line-height: 1.05;
+  white-space: nowrap;  /* 強制一行 */
+  overflow: hidden;     /* 超出不換行，交給 JS 縮字 */
+  max-width: 100%;
+  margin-bottom: 8px;
+}
 
     #message {
       font-size: 1rem;
@@ -490,6 +489,29 @@
         ]
       }
     ];
+const TOPICS = [
+  ...
+];   // 題庫結束這裡
+
+// 讓題目永遠一行：太長就自動縮小字體
+function fitTextToOneLine(element, maxFontSize = 60, minFontSize = 18) {
+  element.style.fontSize = maxFontSize + "px";
+
+  if (!element.offsetWidth) return;
+
+  const containerWidth = element.parentElement.clientWidth;
+  let currentSize = maxFontSize;
+
+  while (element.scrollWidth > containerWidth && currentSize > minFontSize) {
+    currentSize -= 2;
+    element.style.fontSize = currentSize + "px";
+  }
+}
+
+// 狀態變數
+let timer = 0;
+let totalSteps = 0;
+...
 
     // 狀態變數
     let timer = 0;
@@ -593,18 +615,23 @@
 
     // 依目前時間決定題組，並抽一題
     function generateNewQuestion() {
-      const minute = Math.floor(timer / 60);
-      const topicIndex = minute % TOPICS.length;
-      const topic = TOPICS[topicIndex];
+  const minute = Math.floor(timer / 60);
+  const topicIndex = minute % TOPICS.length;
+  const topic = TOPICS[topicIndex];
 
-      const item = randFromArray(topic.items);
+  const item = randFromArray(topic.items);
 
-      topicEl.textContent = `題組：${topic.name}`;
-      mathEl.textContent = item;
-      msgEl.textContent = '';
+  topicEl.textContent = `題組：${topic.name}`;
+  mathEl.textContent = item;
+  msgEl.textContent = '';
 
-      const qSec = parseInt(intervalSlider.value, 10);
-      nextQuestionTime = timer + qSec;
+  // 題目放好後，讓字自動縮小塞進一行
+  fitTextToOneLine(mathEl, 60, 18);
+
+  const qSec = parseInt(intervalSlider.value, 10);
+  nextQuestionTime = timer + qSec;
+}
+
     }
 
     function clearTimers() {
