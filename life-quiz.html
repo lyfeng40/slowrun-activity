@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>超慢跑生活題庫版</title>
+  <title>數學超慢跑體智活動 V11</title>
   <style>
     :root {
       --bg: #111111;
@@ -13,6 +13,7 @@
       --text-main: #f5f5f5;
       --text-sub: #cccccc;
       --text-light: rgba(204, 204, 204, 0.4);
+      --answer: #ffd54f;
     }
 
     * { box-sizing: border-box; }
@@ -160,18 +161,11 @@
       text-align: center;
     }
 
-    #topic {
-      font-size: 1.1rem;
-      color: var(--accent-soft);
-      margin-bottom: 6px;
-      min-height: 1.2em;
-    }
-
     #math {
       font-weight: 800;
       line-height: 1.05;
       white-space: nowrap;   /* 強制一行 */
-      overflow: hidden;      /* 超出不換行，由 JS 縮字 */
+      overflow: hidden;      /* 不換行，由 JS 縮字 */
       max-width: 100%;
       margin-bottom: 8px;
     }
@@ -286,6 +280,16 @@
       white-space: nowrap;
     }
 
+    .answer { 
+      color: var(--answer) !important; 
+      animation: glow 1.5s ease-in-out infinite alternate; 
+    }
+    
+    @keyframes glow {
+      from { text-shadow: 0 0 10px var(--answer); }
+      to { text-shadow: 0 0 20px var(--answer), 0 0 30px var(--answer); }
+    }
+
     @media (max-width: 480px) {
       .controls-top { flex-direction: column; gap: 10px; }
       .control-group { min-width: 220px; }
@@ -308,7 +312,6 @@
 </head>
 <body>
   <div class="container">
-    <!-- 隱藏的 YouTube 音樂播放器 -->
     <iframe id="youtubePlayer"
       src="https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
       frameborder="0"
@@ -316,7 +319,7 @@
       allowfullscreen>
     </iframe>
 
-    <div class="title">超慢跑生活題庫版</div>
+    <div class="title">數學超慢跑體智活動 V11</div>
 
     <div class="controls-top">
       <div class="control-group">
@@ -346,7 +349,6 @@
 
     <div class="math-container">
       <div class="math-panel">
-        <div id="topic">題組：尚未開始</div>
         <div id="math">準備開始…</div>
         <div id="message">&nbsp;</div>
       </div>
@@ -378,7 +380,7 @@
       </div>
       <div class="footer">
         <div>製作者：FENG職能治療師</div>
-        <div>版本：生活題庫 V1</div>
+        <div>版本：V11</div>
       </div>
     </div>
   </div>
@@ -388,103 +390,6 @@
   </audio>
 
   <script>
-    /* ---- 題組＋混淆題 ---- */
-    const TOPICS = [
-      {
-        name: "圓形的東西",
-        items: [
-          "甜甜圈","籃球","湯圓","肉圓","飛盤","網球","披薩","月餅",
-          "台幣十元","牆上的掛鐘","車輪","圓形鏡子","滿月","黑膠唱片",
-          "撲滿","煎雞蛋（荷包蛋）","圓形餐桌轉盤","棋子（圍棋）","圓形口香糖球",
-          "陳圓圓（人名）","正方形積木","三角尺","長方形手機螢幕","三角飯糰"
-        ]
-      },
-      {
-        name: "紅色的東西",
-        items: [
-          "蘋果（紅蘋果）","草莓","紅包","春聯","紅燈籠","消防車","消防栓",
-          "紅色口紅","紅玫瑰","紅辣椒","紅豆","聖女小番茄","紅酒",
-          "紅色運動鞋","紅色背包","紅色安全帽","紅綠燈的紅燈","蓮霧（紅色品種）",
-          "西瓜紅色果肉","藍色原子筆","綠色青椒","黑色皮鞋","白色紙張","透明玻璃杯"
-        ]
-      },
-      {
-        name: "會用到電的東西",
-        items: [
-          "手機","電腦","電視","電冰箱","洗衣機","微波爐","電鍋",
-          "冷氣機","電風扇","電熱水壺","電動牙刷","吹風機","吸塵器",
-          "印表機","Wi‑Fi 分享器","電視遊樂器","電鋼琴","跑步機","電蚊拍",
-          "書桌上的鉛筆","木頭椅子","紙本書","毛巾","竹筷子"
-        ]
-      },
-      {
-        name: "會用到嘴巴的事情",
-        items: [
-          "吃飯","喝水","吃藥","刷牙","說話","唱歌","吹蠟燭","吹氣球",
-          "吹口哨","打哈欠","吃冰淇淋","嚐菜（試味道）","咀嚼口香糖","漱口",
-          "大笑","小聲耳語","吃水果","喝湯","接吻",
-          "用腳踢球","用手鼓掌","用眼睛看電視","用耳朵聽音樂","用鼻子聞花香"
-        ]
-      },
-      {
-        name: "只能用一隻手做的事",
-        items: [
-          "按電鈴","按門鈴對講機","用一隻手拿手機滑螢幕","用一隻手拿遙控器換台",
-          "用一隻手按電梯按鈕","用一隻手開燈開關","用一隻手拿湯匙喝湯","用一隻手拿叉子吃東西",
-          "用一隻手拿梳子梳頭","用一隻手拿牙刷刷牙","用一隻手拿抹布擦桌子","用一隻手拿鑰匙開鎖",
-          "用一隻手拿門卡刷門禁","用一隻手拿購物袋","用一隻手滑電腦滑鼠","用一隻手拿手機自拍",
-          "用一隻手按手機拍照鍵","用一隻手拉抽屜","用一隻手拉拉鍊",
-          "用兩手抱棉被","用兩手搬桌子","用兩手騎腳踏車","用兩手打鍵盤","用兩手拖地板"
-        ]
-      },
-      {
-        name: "在天上飛的東西",
-        items: [
-          "小鳥","老鷹","麻雀","蝙蝠","蝴蝶","蜜蜂","蒼蠅","飛機",
-          "直升機","滑翔翼","無人機","風箏","熱氣球","雲","雪花",
-          "紙飛機","飛盤","煙火","流星",
-          "狗狗","長頸鹿","石頭","冰箱","沙發"
-        ]
-      },
-      {
-        name: "在廚房裡常見的東西",
-        items: [
-          "炒鍋","湯鍋","菜刀","砧板","鍋鏟","湯勺","筷子","湯匙",
-          "碗","盤子","杯子","電鍋","瓦斯爐 / 電磁爐","抽油煙機","冰箱",
-          "微波爐","抹布","洗碗精","垃圾桶",
-          "籃球鞋","漫畫書","枕頭","牙醫椅","電梯按鈕"
-        ]
-      },
-      {
-        name: "在浴室裡常見的東西",
-        items: [
-          "牙刷","牙膏","漱口杯","毛巾","浴巾","肥皂","沐浴乳","洗髮精",
-          "蓮蓬頭","洗臉盆","馬桶","馬桶刷","衛生紙","浴室腳踏墊","鏡子",
-          "洗衣籃","洗面乳","刮鬍刀","吹風機",
-          "電視遙控器","滑鼠鍵盤","球鞋鞋盒","書桌檯燈","砂石車"
-        ]
-      },
-      {
-        name: "在診所／醫院會看到的東西",
-        items: [
-          "掛號櫃台","候診椅","號碼牌機","叫號螢幕","醫師白袍",
-          "護理站","聽診器","血壓計","量體溫的體溫計","體重機","病床","輪椅",
-          "拐杖","點滴架","藥袋","處方籤","檢驗試管","消毒酒精瓶","牆上的衛教海報",
-          "狗狗","長頸鹿","遊樂園雲霄飛車","漫畫展售攤位","冰淇淋推車"
-        ]
-      },
-      {
-        name: "可以在超市買到的東西",
-        items: [
-          "白米","麵條","吐司","牛奶","優酪乳","雞蛋","豆漿","豆腐",
-          "高麗菜","青江菜","蘋果","香蕉","柳橙","餅乾","巧克力",
-          "泡麵","罐頭（玉米罐頭）","冷凍水餃","冰淇淋","洗衣精","衛生紙","垃圾袋","牙膏",
-          "家裡門的鑰匙","我家的棉被","我家的沙發","我朋友本人"
-        ]
-      }
-    ];
-
-    // 文字自動縮成一行
     function fitTextToOneLine(element, maxFontSize = 56, minFontSize = 18) {
       element.style.fontSize = maxFontSize + "px";
       if (!element.offsetWidth) return;
@@ -496,10 +401,11 @@
       }
     }
 
-    // 狀態變數
     let timer = 0;
     let totalSteps = 0;
     let intervalId = null;
+    let currentProblem = {};
+    let showAnswerTimeout = null;
     let isRunning = false;
     let isPaused = false;
     let musicEnabled = false;
@@ -518,7 +424,6 @@
     const stopBtn = document.getElementById('stopBtn');
     const musicBtn = document.getElementById('musicBtn');
     const timerEl = document.getElementById('timer');
-    const topicEl = document.getElementById('topic');
     const mathEl = document.getElementById('math');
     const msgEl = document.getElementById('message');
     const totalStepsEl = document.getElementById('totalSteps');
@@ -535,7 +440,6 @@
     const pauseRestartBtn = document.getElementById('pauseRestartBtn');
     const resumeBtn = document.getElementById('resumeBtn');
 
-    // YouTube IFrame API
     let ytPlayer = null;
     function onYouTubeIframeAPIReady() {
       ytPlayer = new YT.Player('youtubePlayer', {});
@@ -589,32 +493,167 @@
       totalStepsEl.textContent = totalSteps;
     }
 
-    function randFromArray(arr) {
-      const idx = Math.floor(Math.random() * arr.length); // [web:155]
-      return arr[idx];
+    function randInt(min,max){
+      return Math.floor(Math.random()*(max-min+1))+min;
     }
 
-    // 根據時間決定現在題組，並抽一題
-    function generateNewQuestion() {
-      const minute = Math.floor(timer / 60);
-      const topicIndex = minute % TOPICS.length; // 每兩分鐘換一組，10 組輪流
-      const topic = TOPICS[topicIndex];
-      const item = randFromArray(topic.items);
+    function getDifficultyLevelByTime(sec) {
+      const minute = Math.floor(sec / 60);
+      if (minute <= 0) return 1;
+      if (minute === 1) return 2;
+      if (minute === 2) return 3;
+      if (minute === 3) return 4;
+      if (minute === 4) return 5;
+      if (minute === 5) return 6;
+      if (minute === 6) return 7;
+      if (minute === 7) return 8;
+      if (minute === 8) return 9;
+      if (minute === 9) return 10;
+      return 11;
+    }
 
-      topicEl.textContent = `題組：${topic.name}`;
-      mathEl.textContent = item;
+    function generateMathProblem() {
+      const level = getDifficultyLevelByTime(timer);
+      let a, b, c, op, expected;
+      const ops = ['+','-','×','÷'];
+
+      if (level === 1) {
+        a = randInt(1,9);
+        b = randInt(1,9);
+        op = '+';
+        expected = a + b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 2) {
+        a = randInt(1,9);
+        b = randInt(10,99);
+        op = '+';
+        expected = a + b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 3) {
+        a = randInt(10,99);
+        b = randInt(1,9);
+        op = '+';
+        expected = a + b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 4) {
+        a = randInt(1,9);
+        b = randInt(0,9);
+        if (b > a) [a,b] = [b,a];
+        op = '-';
+        expected = a - b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 5) {
+        a = randInt(1,9);
+        b = randInt(1,9);
+        op = '-';
+        expected = a - b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 6) {
+        a = randInt(10,99);
+        b = randInt(1,9);
+        op = '-';
+        expected = a - b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 7) {
+        a = randInt(1,9);
+        b = randInt(10,99);
+        op = '-';
+        expected = a - b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 8) {
+        a = randInt(1,9);
+        b = randInt(1,9);
+        op = '×';
+        expected = a * b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 9) {
+        a = randInt(10,99);
+        b = randInt(2,9);
+        op = '×';
+        expected = a * b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 10) {
+        op = '×';
+        do {
+          a = randInt(1,9);
+          b = randInt(10,99);
+          expected = a * b;
+        } while (expected > 300);
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else {
+        const mode = randInt(1,3);
+        if (mode === 1) {
+          b = randInt(2,9);
+          expected = randInt(1,9);
+          a = b * expected;
+          op = '÷';
+          currentProblem = { a, b, op, expected };
+          mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+        } else if (mode === 2) {
+          a = randInt(1,9);
+          b = randInt(1,9);
+          c = randInt(1,9);
+          const op1 = ops[randInt(0,1)];
+          const op2 = ops[randInt(0,1)];
+          let exprText = `${a} ${op1} ${b} ${op2} ${c}`;
+          let val = (op1 === '+') ? a + b : a - b;
+          val = (op2 === '+') ? val + c : val - c;
+          currentProblem = { text: exprText, expected: val };
+          mathEl.innerHTML = `${exprText} = ?`;
+        } else {
+          a = randInt(1,9);
+          b = randInt(1,9);
+          c = randInt(1,9);
+          const op1 = '×';
+          const op2 = randInt(0,1) ? '+' : '-';
+          let exprText = `${a} ${op1} ${b} ${op2} ${c}`;
+          let val = a * b;
+          val = (op2 === '+') ? val + c : val - c;
+          currentProblem = { text: exprText, expected: val };
+          mathEl.innerHTML = `${exprText} = ?`;
+        }
+      }
+
       msgEl.textContent = '';
-
       fitTextToOneLine(mathEl, 56, 18);
 
       const qSec = parseInt(intervalSlider.value, 10);
       nextQuestionTime = timer + qSec;
     }
 
+    function showAnswer() {
+      if (currentProblem.text !== undefined) {
+        mathEl.innerHTML =
+          `${currentProblem.text} = <span class="answer">${currentProblem.expected}</span>`;
+      } else {
+        mathEl.innerHTML =
+          `${currentProblem.a} ${currentProblem.op} ${currentProblem.b} = <span class="answer">${currentProblem.expected}</span>`;
+      }
+      fitTextToOneLine(mathEl, 56, 18);
+
+      showAnswerTimeout = setTimeout(() => {
+        generateMathProblem();
+      }, 1200);
+    }
+
     function clearTimers() {
       if (intervalId) {
         cancelAnimationFrame(intervalId);
         intervalId = null;
+      }
+      if (showAnswerTimeout) {
+        clearTimeout(showAnswerTimeout);
+        showAnswerTimeout = null;
       }
     }
 
@@ -626,9 +665,8 @@
       isPaused = false;
       updateTimer();
       updateStats();
-      topicEl.textContent = "題組：尚未開始";
-      mathEl.textContent = "準備開始…";
-      msgEl.textContent = " ";
+      mathEl.innerHTML = '準備開始…';
+      msgEl.textContent = ' ';
       statsPanelStop.classList.remove('show');
       statsPanelPause.classList.remove('show');
       startBtn.disabled = false;
@@ -662,7 +700,7 @@
         }
 
         if (timer >= nextQuestionTime) {
-          generateNewQuestion();
+          showAnswer();
         }
 
         intervalId = requestAnimationFrame(loop);
@@ -682,7 +720,7 @@
         ytPlayer.playVideo();
       }
 
-      generateNewQuestion();
+      generateMathProblem();
       startLoop();
     }
 
@@ -756,6 +794,5 @@
 
     resumeBtn.onclick = () => { resumeGame(); };
   </script>
-  <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>
