@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>數學超慢跑體智活動 V11</title>
   <style>
     :root {
@@ -312,7 +312,6 @@
 </head>
 <body>
   <div class="container">
-    <!-- 隱藏的 YouTube 音樂播放器 -->
     <iframe id="youtubePlayer"
       src="https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
       frameborder="0"
@@ -326,7 +325,7 @@
       <div class="control-group">
         <div class="control-label">步頻</div>
         <div class="control-value" id="cadenceValue">180</div>
-        <input type="range" id="cadence" min="150" max="200" value="180">
+        <input type="range" id="cadence" min="150" max="200" value="180" />
         <div class="range-labels">
           <span>150</span><span>200</span>
         </div>
@@ -334,7 +333,7 @@
       <div class="control-group">
         <div class="control-label">每題秒數</div>
         <div class="control-value" id="intervalValue">4秒</div>
-        <input type="range" id="interval" min="3" max="10" value="4">
+        <input type="range" id="interval" min="3" max="10" value="4" />
         <div class="range-labels">
           <span>3</span><span>10</span>
         </div>
@@ -391,7 +390,6 @@
   </audio>
 
   <script>
-    /* 文字自動縮成一行（題目＋答案都用） */
     function fitTextToOneLine(element, maxFontSize = 56, minFontSize = 18) {
       element.style.fontSize = maxFontSize + "px";
       if (!element.offsetWidth) return;
@@ -403,7 +401,6 @@
       }
     }
 
-    // 狀態變數
     let timer = 0;
     let totalSteps = 0;
     let intervalId = null;
@@ -443,7 +440,6 @@
     const pauseRestartBtn = document.getElementById('pauseRestartBtn');
     const resumeBtn = document.getElementById('resumeBtn');
 
-    // YouTube IFrame API
     let ytPlayer = null;
     function onYouTubeIframeAPIReady() {
       ytPlayer = new YT.Player('youtubePlayer', {});
@@ -587,7 +583,6 @@
         mathEl.innerHTML = `${a} ${op} ${b} = ?`;
       } else if (level === 10) {
         op = '×';
-        // 個位數 × 兩位數，且乘積 ≤ 300
         do {
           a = randInt(1,9);
           b = randInt(10,99);
@@ -734,7 +729,6 @@
       isPaused = true;
       clearTimers();
 
-      // 暫停時音樂一起暫停
       if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) {
         ytPlayer.pauseVideo();
       }
