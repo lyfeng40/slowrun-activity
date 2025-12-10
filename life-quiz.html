@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>超慢跑生活題庫版</title>
   <style>
     :root {
@@ -308,6 +308,7 @@
 </head>
 <body>
   <div class="container">
+    <!-- 隱藏的 YouTube 音樂播放器 -->
     <iframe id="youtubePlayer"
       src="https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
       frameborder="0"
@@ -321,7 +322,7 @@
       <div class="control-group">
         <div class="control-label">步頻</div>
         <div class="control-value" id="cadenceValue">180</div>
-        <input type="range" id="cadence" min="150" max="200" value="180">
+        <input type="range" id="cadence" min="150" max="200" value="180" />
         <div class="range-labels">
           <span>150</span><span>200</span>
         </div>
@@ -329,7 +330,7 @@
       <div class="control-group">
         <div class="control-label">每題秒數</div>
         <div class="control-value" id="intervalValue">4秒</div>
-        <input type="range" id="interval" min="3" max="10" value="4">
+        <input type="range" id="interval" min="3" max="10" value="4" />
         <div class="range-labels">
           <span>3</span><span>10</span>
         </div>
@@ -377,7 +378,7 @@
       </div>
       <div class="footer">
         <div>製作者：FENG職能治療師</div>
-        <div>版本：生活題庫V1</div>
+        <div>版本：生活題庫 V1</div>
       </div>
     </div>
   </div>
@@ -387,23 +388,23 @@
   </audio>
 
   <script>
-    /* 題組題庫（每組已混入搞笑/混淆題） */
+    /* ---- 題組＋混淆題 ---- */
     const TOPICS = [
       {
         name: "圓形的東西",
         items: [
           "甜甜圈","籃球","湯圓","肉圓","飛盤","網球","披薩","月餅",
-          "台幣十元","掛鐘","車輪","圓形鏡子","滿月","黑膠唱片",
-          "撲滿","煎雞蛋","圓形餐桌轉盤","圍棋棋子","圓形口香糖球",
+          "台幣十元","牆上的掛鐘","車輪","圓形鏡子","滿月","黑膠唱片",
+          "撲滿","煎雞蛋（荷包蛋）","圓形餐桌轉盤","棋子（圍棋）","圓形口香糖球",
           "陳圓圓（人名）","正方形積木","三角尺","長方形手機螢幕","三角飯糰"
         ]
       },
       {
         name: "紅色的東西",
         items: [
-          "紅蘋果","草莓","紅包","春聯","紅燈籠","消防車","消防栓",
+          "蘋果（紅蘋果）","草莓","紅包","春聯","紅燈籠","消防車","消防栓",
           "紅色口紅","紅玫瑰","紅辣椒","紅豆","聖女小番茄","紅酒",
-          "紅色運動鞋","紅色背包","紅色安全帽","紅綠燈的紅燈","紅色蓮霧",
+          "紅色運動鞋","紅色背包","紅色安全帽","紅綠燈的紅燈","蓮霧（紅色品種）",
           "西瓜紅色果肉","藍色原子筆","綠色青椒","黑色皮鞋","白色紙張","透明玻璃杯"
         ]
       },
@@ -412,28 +413,28 @@
         items: [
           "手機","電腦","電視","電冰箱","洗衣機","微波爐","電鍋",
           "冷氣機","電風扇","電熱水壺","電動牙刷","吹風機","吸塵器",
-          "印表機","Wi‑Fi分享器","電視遊樂器","電鋼琴","跑步機","電蚊拍",
-          "鉛筆","木頭椅子","紙本書","毛巾","竹筷子"
+          "印表機","Wi‑Fi 分享器","電視遊樂器","電鋼琴","跑步機","電蚊拍",
+          "書桌上的鉛筆","木頭椅子","紙本書","毛巾","竹筷子"
         ]
       },
       {
         name: "會用到嘴巴的事情",
         items: [
           "吃飯","喝水","吃藥","刷牙","說話","唱歌","吹蠟燭","吹氣球",
-          "吹口哨","打哈欠","吃冰淇淋","嚐菜","咀嚼口香糖","漱口",
-          "大笑","耳語","吃水果","喝湯","接吻",
+          "吹口哨","打哈欠","吃冰淇淋","嚐菜（試味道）","咀嚼口香糖","漱口",
+          "大笑","小聲耳語","吃水果","喝湯","接吻",
           "用腳踢球","用手鼓掌","用眼睛看電視","用耳朵聽音樂","用鼻子聞花香"
         ]
       },
       {
         name: "只能用一隻手做的事",
         items: [
-          "按電鈴","按門鈴對講機","單手滑手機","單手拿遙控器換台",
-          "按電梯按鈕","開關燈","單手拿湯匙喝湯","單手拿叉子吃東西",
-          "單手拿梳子梳頭","單手拿牙刷刷牙","單手擦桌子","拿鑰匙開鎖",
-          "拿門卡刷門禁","單手提購物袋","滑電腦滑鼠","單手自拍",
-          "單手按手機拍照鍵","單手拉抽屜","單手拉拉鍊",
-          "兩手抱棉被","兩手搬桌子","兩手騎腳踏車","兩手打鍵盤","兩手拖地板"
+          "按電鈴","按門鈴對講機","用一隻手拿手機滑螢幕","用一隻手拿遙控器換台",
+          "用一隻手按電梯按鈕","用一隻手開燈開關","用一隻手拿湯匙喝湯","用一隻手拿叉子吃東西",
+          "用一隻手拿梳子梳頭","用一隻手拿牙刷刷牙","用一隻手拿抹布擦桌子","用一隻手拿鑰匙開鎖",
+          "用一隻手拿門卡刷門禁","用一隻手拿購物袋","用一隻手滑電腦滑鼠","用一隻手拿手機自拍",
+          "用一隻手按手機拍照鍵","用一隻手拉抽屜","用一隻手拉拉鍊",
+          "用兩手抱棉被","用兩手搬桌子","用兩手騎腳踏車","用兩手打鍵盤","用兩手拖地板"
         ]
       },
       {
@@ -449,7 +450,7 @@
         name: "在廚房裡常見的東西",
         items: [
           "炒鍋","湯鍋","菜刀","砧板","鍋鏟","湯勺","筷子","湯匙",
-          "碗","盤子","杯子","電鍋","瓦斯爐","抽油煙機","冰箱",
+          "碗","盤子","杯子","電鍋","瓦斯爐 / 電磁爐","抽油煙機","冰箱",
           "微波爐","抹布","洗碗精","垃圾桶",
           "籃球鞋","漫畫書","枕頭","牙醫椅","電梯按鈕"
         ]
@@ -464,35 +465,31 @@
         ]
       },
       {
-        name: "在診所或醫院會看到的東西",
+        name: "在診所／醫院會看到的東西",
         items: [
           "掛號櫃台","候診椅","號碼牌機","叫號螢幕","醫師白袍",
-          "護理站","聽診器","血壓計","體溫計","體重機","病床","輪椅",
-          "拐杖","點滴架","藥袋","處方箋","檢驗試管","消毒酒精瓶",
-          "衛教海報",
-          "狗狗","長頸鹿","雲霄飛車","漫畫展攤位","冰淇淋推車"
+          "護理站","聽診器","血壓計","量體溫的體溫計","體重機","病床","輪椅",
+          "拐杖","點滴架","藥袋","處方籤","檢驗試管","消毒酒精瓶","牆上的衛教海報",
+          "狗狗","長頸鹿","遊樂園雲霄飛車","漫畫展售攤位","冰淇淋推車"
         ]
       },
       {
         name: "可以在超市買到的東西",
         items: [
-          "白米","麵條","吐司","牛奶","優酪乳","雞蛋","豆漿",
-          "豆腐","高麗菜","青江菜","蘋果","香蕉","柳橙","餅乾","巧克力",
-          "泡麵","玉米罐頭","冷凍水餃","冰淇淋","洗衣精","衛生紙","垃圾袋","牙膏",
+          "白米","麵條","吐司","牛奶","優酪乳","雞蛋","豆漿","豆腐",
+          "高麗菜","青江菜","蘋果","香蕉","柳橙","餅乾","巧克力",
+          "泡麵","罐頭（玉米罐頭）","冷凍水餃","冰淇淋","洗衣精","衛生紙","垃圾袋","牙膏",
           "家裡門的鑰匙","我家的棉被","我家的沙發","我朋友本人"
         ]
       }
     ];
 
-    // 文字自動縮小成一行
+    // 文字自動縮成一行
     function fitTextToOneLine(element, maxFontSize = 56, minFontSize = 18) {
       element.style.fontSize = maxFontSize + "px";
-
       if (!element.offsetWidth) return;
-
       const containerWidth = element.parentElement.clientWidth;
       let currentSize = maxFontSize;
-
       while (element.scrollWidth > containerWidth && currentSize > minFontSize) {
         currentSize -= 2;
         element.style.fontSize = currentSize + "px";
@@ -538,6 +535,7 @@
     const pauseRestartBtn = document.getElementById('pauseRestartBtn');
     const resumeBtn = document.getElementById('resumeBtn');
 
+    // YouTube IFrame API
     let ytPlayer = null;
     function onYouTubeIframeAPIReady() {
       ytPlayer = new YT.Player('youtubePlayer', {});
@@ -592,15 +590,15 @@
     }
 
     function randFromArray(arr) {
-      const idx = Math.floor(Math.random() * arr.length);
+      const idx = Math.floor(Math.random() * arr.length); // [web:155]
       return arr[idx];
     }
 
+    // 根據時間決定現在題組，並抽一題
     function generateNewQuestion() {
       const minute = Math.floor(timer / 60);
-      const topicIndex = minute % TOPICS.length;
+      const topicIndex = minute % TOPICS.length; // 每兩分鐘換一組，10 組輪流
       const topic = TOPICS[topicIndex];
-
       const item = randFromArray(topic.items);
 
       topicEl.textContent = `題組：${topic.name}`;
@@ -693,7 +691,9 @@
       isPaused = true;
       clearTimers();
 
-      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) {
+        ytPlayer.pauseVideo();
+      }
 
       finalTimePauseEl.textContent = formatTime(timer);
       finalStepsPauseEl.textContent = totalSteps;
@@ -709,7 +709,9 @@
       isPaused = false;
       statsPanelPause.classList.remove('show');
 
-      if (musicEnabled && ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+      if (musicEnabled && ytPlayer && ytPlayer.playVideo) {
+        ytPlayer.playVideo();
+      }
 
       lastLoopTime = performance.now();
       lastStepTime = lastLoopTime;
@@ -724,7 +726,9 @@
       isRunning = false;
       isPaused = false;
 
-      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) {
+        ytPlayer.pauseVideo();
+      }
 
       finalTimeStopEl.textContent = formatTime(timer);
       finalStepsStopEl.textContent = totalSteps;
@@ -752,5 +756,6 @@
 
     resumeBtn.onclick = () => { resumeGame(); };
   </script>
+  <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>
