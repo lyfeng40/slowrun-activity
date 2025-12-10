@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>生活題庫版超慢跑體智活動</title>
+  <title>超慢跑生活題庫版</title>
   <style>
     :root {
       --bg: #111111;
@@ -13,7 +13,6 @@
       --text-main: #f5f5f5;
       --text-sub: #cccccc;
       --text-light: rgba(204, 204, 204, 0.4);
-      --answer: #ffd54f;
     }
 
     * { box-sizing: border-box; }
@@ -168,15 +167,14 @@
       min-height: 1.2em;
     }
 
-#math {
-  font-size: clamp(2.6rem, 7vw, 5.2rem);
-  font-weight: 800;
-  line-height: 1.05;
-  white-space: nowrap;  /* 強制一行 */
-  overflow: hidden;     /* 超出不換行，交給 JS 縮字 */
-  max-width: 100%;
-  margin-bottom: 8px;
-}
+    #math {
+      font-weight: 800;
+      line-height: 1.05;
+      white-space: nowrap;   /* 強制一行 */
+      overflow: hidden;      /* 超出不換行，由 JS 縮字 */
+      max-width: 100%;
+      margin-bottom: 8px;
+    }
 
     #message {
       font-size: 1rem;
@@ -293,7 +291,7 @@
       .control-group { min-width: 220px; }
       input[type="range"] { width: 180px; }
       .math-panel { padding: 16px 10px; }
-      #math { font-size: clamp(2.2rem, 9vw, 4.2rem); }
+      #math { font-size: 2.2rem; }
       .stats-panel { width: 90%; }
     }
 
@@ -310,7 +308,6 @@
 </head>
 <body>
   <div class="container">
-    <!-- 隱藏 YouTube 播放器（只用來放音樂） -->
     <iframe id="youtubePlayer"
       src="https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
       frameborder="0"
@@ -318,7 +315,7 @@
       allowfullscreen>
     </iframe>
 
-    <div class="title">生活題庫版超慢跑體智活動</div>
+    <div class="title">超慢跑生活題庫版</div>
 
     <div class="controls-top">
       <div class="control-group">
@@ -353,7 +350,6 @@
         <div id="message">&nbsp;</div>
       </div>
 
-      <!-- 停止面板 -->
       <div id="statsPanelStop" class="stats-panel">
         <h3 class="stats-title">🎉 練習結束</h3>
         <div class="stat-line">總時間：<span class="stat-value" id="finalTimeStop">--</span></div>
@@ -363,7 +359,6 @@
         </div>
       </div>
 
-      <!-- 暫停面板 -->
       <div id="statsPanelPause" class="stats-panel">
         <h3 class="stats-title">⏸️ 已暫停</h3>
         <div class="stat-line">目前時間：<span class="stat-value" id="finalTimePause">--</span></div>
@@ -387,13 +382,12 @@
     </div>
   </div>
 
-  <!-- 節拍器腳步聲 -->
   <audio id="footstep" preload="auto">
     <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoAAAAA=" type="audio/wav">
   </audio>
 
   <script>
-    /* ------------ 題組題庫（每組至少 5 題混淆） ------------ */
+    /* 題組題庫（每組已混入搞笑/混淆題） */
     const TOPICS = [
       {
         name: "圓形的東西",
@@ -489,35 +483,26 @@
         ]
       }
     ];
-const TOPICS = [
-  ...
-];   // 題庫結束這裡
 
-// 讓題目永遠一行：太長就自動縮小字體
-function fitTextToOneLine(element, maxFontSize = 60, minFontSize = 18) {
-  element.style.fontSize = maxFontSize + "px";
+    // 文字自動縮小成一行
+    function fitTextToOneLine(element, maxFontSize = 56, minFontSize = 18) {
+      element.style.fontSize = maxFontSize + "px";
 
-  if (!element.offsetWidth) return;
+      if (!element.offsetWidth) return;
 
-  const containerWidth = element.parentElement.clientWidth;
-  let currentSize = maxFontSize;
+      const containerWidth = element.parentElement.clientWidth;
+      let currentSize = maxFontSize;
 
-  while (element.scrollWidth > containerWidth && currentSize > minFontSize) {
-    currentSize -= 2;
-    element.style.fontSize = currentSize + "px";
-  }
-}
-
-// 狀態變數
-let timer = 0;
-let totalSteps = 0;
-...
+      while (element.scrollWidth > containerWidth && currentSize > minFontSize) {
+        currentSize -= 2;
+        element.style.fontSize = currentSize + "px";
+      }
+    }
 
     // 狀態變數
     let timer = 0;
     let totalSteps = 0;
     let intervalId = null;
-    let showAnswerTimeout = null;
     let isRunning = false;
     let isPaused = false;
     let musicEnabled = false;
@@ -527,7 +512,6 @@ let totalSteps = 0;
     let stepInterval = 60000 / 180;
     let nextQuestionTime = 0;
 
-    // DOM
     const cadenceSlider = document.getElementById('cadence');
     const intervalSlider = document.getElementById('interval');
     const cadenceValue = document.getElementById('cadenceValue');
@@ -586,7 +570,6 @@ let totalSteps = 0;
 
     intervalSlider.oninput = () => {
       intervalValue.textContent = intervalSlider.value + '秒';
-      // 每題秒數在 generateNewQuestion 時讀取
     };
 
     function playFootstep() {
@@ -613,35 +596,27 @@ let totalSteps = 0;
       return arr[idx];
     }
 
-    // 依目前時間決定題組，並抽一題
     function generateNewQuestion() {
-  const minute = Math.floor(timer / 60);
-  const topicIndex = minute % TOPICS.length;
-  const topic = TOPICS[topicIndex];
+      const minute = Math.floor(timer / 60);
+      const topicIndex = minute % TOPICS.length;
+      const topic = TOPICS[topicIndex];
 
-  const item = randFromArray(topic.items);
+      const item = randFromArray(topic.items);
 
-  topicEl.textContent = `題組：${topic.name}`;
-  mathEl.textContent = item;
-  msgEl.textContent = '';
+      topicEl.textContent = `題組：${topic.name}`;
+      mathEl.textContent = item;
+      msgEl.textContent = '';
 
-  // 題目放好後，讓字自動縮小塞進一行
-  fitTextToOneLine(mathEl, 60, 18);
+      fitTextToOneLine(mathEl, 56, 18);
 
-  const qSec = parseInt(intervalSlider.value, 10);
-  nextQuestionTime = timer + qSec;
-}
-
+      const qSec = parseInt(intervalSlider.value, 10);
+      nextQuestionTime = timer + qSec;
     }
 
     function clearTimers() {
       if (intervalId) {
         cancelAnimationFrame(intervalId);
         intervalId = null;
-      }
-      if (showAnswerTimeout) {
-        clearTimeout(showAnswerTimeout);
-        showAnswerTimeout = null;
       }
     }
 
@@ -761,7 +736,6 @@ let totalSteps = 0;
       stopBtn.disabled = true;
     }
 
-    // 事件綁定
     startBtn.onclick = () => { if (!isRunning) startTimer(); };
     pauseBtn.onclick = () => { pauseGame(); };
     stopBtn.onclick = () => { if (isRunning || isPaused) stopAll(); };
