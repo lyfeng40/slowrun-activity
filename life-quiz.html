@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>生活題庫版超慢跑體智活動</title>
+  <style>
+    :root {
+      --bg: #111111;
+      --card: #1e1e1e;
+      --accent: #4a90e2;
+      --accent-soft: #f5a623;
+      --text-main: #f5f5f5;
+      --text-sub: #cccccc;
+      --text-light: rgba(204, 204, 204, 0.4);
+      --answer: #ffd54f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      height: 90vh;
+      max-height: 820px;
+      position: relative;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent-soft);
+      margin-bottom: 6px;
+      white-space: nowrap;
+    }
+
+    .controls-top {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0 16px;
+      border-bottom: 1px solid #333;
+      margin-bottom: 12px;
+    }
+
+    .control-group {
+      text-align: center;
+      min-width: 140px;
+    }
+
+    .control-label {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      margin-bottom: 4px;
+    }
+
+    .control-value {
+      font-size: 1.1rem;
+      color: var(--accent-soft);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    input[type="range"] {
+      width: 120px;
+      height: 6px;
+      accent-color: var(--accent);
+      border-radius: 3px;
+      margin-bottom: 2px;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 12px 0 14px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 22px;
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex: 1;
+      max-width: 110px;
+      white-space: nowrap;
+    }
+
+    #startBtn {
+      background: linear-gradient(135deg, var(--accent), #357abd);
+      color: white;
+      box-shadow: 0 4px 12px rgba(74,144,226,0.4);
+    }
+
+    #pauseBtn, #stopBtn, #musicBtn {
+      background: #444;
+      color: var(--text-main);
+    }
+
+    #musicBtn.active {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      box-shadow: 0 4px 12px rgba(76,175,80,0.4);
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    button:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+    }
+
+    .math-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 0;
+      position: relative;
+    }
+
+    .math-panel {
+      background: rgba(0,0,0,0.2);
+      border-radius: 14px;
+      padding: 20px 16px;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+    }
+
+    #topic {
+      font-size: 1.1rem;
+      color: var(--accent-soft);
+      margin-bottom: 6px;
+      min-height: 1.2em;
+    }
+
+    #math {
+      font-size: clamp(2.6rem, 7vw, 5.2rem);
+      font-weight: 800;
+      line-height: 1.05;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      margin-bottom: 8px;
+    }
+
+    #message {
+      font-size: 1rem;
+      color: var(--text-sub);
+      min-height: 1.2em;
+    }
+
+    .stats-panel {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 80%;
+      max-width: 380px;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+      border: 2px solid var(--accent);
+      border-radius: 16px;
+      padding: 22px 18px;
+      text-align: center;
+      z-index: 100;
+      box-sizing: border-box;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .stats-panel.show {
+      display: flex;
+    }
+
+    .stats-title {
+      margin: 0;
+      color: var(--accent-soft);
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .stat-line {
+      font-size: 1rem;
+      color: var(--text-main);
+      line-height: 1.4;
+      margin: 4px 0;
+    }
+
+    .stat-value {
+      color: var(--accent-soft);
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+
+    .stats-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+      flex-wrap: nowrap;
+    }
+
+    .stats-btn {
+      flex: 1;
+      min-width: 0;
+    }
+
+    #restartBtn, #pauseRestartBtn {
+      background: linear-gradient(135deg, var(--accent-soft), #d98c1a);
+      color: white;
+    }
+
+    #resumeBtn {
+      background: linear-gradient(135deg, var(--accent), #357abd);
+      color: white;
+    }
+
+    .bottom-wrapper {
+      border-top: 1px solid #333;
+      padding-top: 8px;
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bottom-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .timer-small {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .steps-text {
+      font-size: 0.85rem;
+      color: var(--accent-soft);
+    }
+
+    .footer {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      font-size: 0.75rem;
+      color: var(--accent-soft);
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 480px) {
+      .controls-top { flex-direction: column; gap: 10px; }
+      .control-group { min-width: 220px; }
+      input[type="range"] { width: 180px; }
+      .math-panel { padding: 16px 10px; }
+      #math { font-size: clamp(2.2rem, 9vw, 4.2rem); }
+      .stats-panel { width: 90%; }
+    }
+
+    #youtubePlayer {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      visibility: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 隱藏 YouTube 播放器（只用來放音樂） -->
+    <iframe id="youtubePlayer"
+      src="https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
+      frameborder="0"
+      allow="autoplay; encrypted-media"
+      allowfullscreen>
+    </iframe>
+
+    <div class="title">生活題庫版超慢跑體智活動</div>
+
+    <div class="controls-top">
+      <div class="control-group">
+        <div class="control-label">步頻</div>
+        <div class="control-value" id="cadenceValue">180</div>
+        <input type="range" id="cadence" min="150" max="200" value="180">
+        <div class="range-labels">
+          <span>150</span><span>200</span>
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="control-label">每題秒數</div>
+        <div class="control-value" id="intervalValue">4秒</div>
+        <input type="range" id="interval" min="3" max="10" value="4">
+        <div class="range-labels">
+          <span>3</span><span>10</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button id="startBtn">▶️ 開始</button>
+      <button id="pauseBtn" disabled>⏸️ 暫停</button>
+      <button id="stopBtn" disabled>⏹️ 停止</button>
+      <button id="musicBtn">🎵 音樂</button>
+    </div>
+
+    <div class="math-container">
+      <div class="math-panel">
+        <div id="topic">題組：尚未開始</div>
+        <div id="math">準備開始…</div>
+        <div id="message">&nbsp;</div>
+      </div>
+
+      <!-- 停止面板 -->
+      <div id="statsPanelStop" class="stats-panel">
+        <h3 class="stats-title">🎉 練習結束</h3>
+        <div class="stat-line">總時間：<span class="stat-value" id="finalTimeStop">--</span></div>
+        <div class="stat-line">總步數：<span class="stat-value" id="finalStepsStop">--</span></div>
+        <div class="stats-buttons">
+          <button id="restartBtn" class="stats-btn">🔄 重新開始</button>
+        </div>
+      </div>
+
+      <!-- 暫停面板 -->
+      <div id="statsPanelPause" class="stats-panel">
+        <h3 class="stats-title">⏸️ 已暫停</h3>
+        <div class="stat-line">目前時間：<span class="stat-value" id="finalTimePause">--</span></div>
+        <div class="stat-line">目前步數：<span class="stat-value" id="finalStepsPause">--</span></div>
+        <div class="stats-buttons">
+          <button id="pauseRestartBtn" class="stats-btn">🔄 重新開始</button>
+          <button id="resumeBtn" class="stats-btn">▶️ 繼續</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-wrapper">
+      <div class="bottom-stats">
+        <div class="timer-small" id="timer">00:00</div>
+        <div class="steps-text">步數：<span id="totalSteps">0</span></div>
+      </div>
+      <div class="footer">
+        <div>製作者：FENG職能治療師</div>
+        <div>版本：生活題庫V1</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 節拍器腳步聲 -->
+  <audio id="footstep" preload="auto">
+    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoAAAAA=" type="audio/wav">
+  </audio>
+
+  <script>
+    /* ------------ 題組題庫（每組至少 5 題混淆） ------------ */
+    const TOPICS = [
+      {
+        name: "圓形的東西",
+        items: [
+          "甜甜圈","籃球","湯圓","肉圓","飛盤","網球","披薩","月餅",
+          "台幣十元","掛鐘","車輪","圓形鏡子","滿月","黑膠唱片",
+          "撲滿","煎雞蛋","圓形餐桌轉盤","圍棋棋子","圓形口香糖球",
+          "陳圓圓（人名）","正方形積木","三角尺","長方形手機螢幕","三角飯糰"
+        ]
+      },
+      {
+        name: "紅色的東西",
+        items: [
+          "紅蘋果","草莓","紅包","春聯","紅燈籠","消防車","消防栓",
+          "紅色口紅","紅玫瑰","紅辣椒","紅豆","聖女小番茄","紅酒",
+          "紅色運動鞋","紅色背包","紅色安全帽","紅綠燈的紅燈","紅色蓮霧",
+          "西瓜紅色果肉","藍色原子筆","綠色青椒","黑色皮鞋","白色紙張","透明玻璃杯"
+        ]
+      },
+      {
+        name: "會用到電的東西",
+        items: [
+          "手機","電腦","電視","電冰箱","洗衣機","微波爐","電鍋",
+          "冷氣機","電風扇","電熱水壺","電動牙刷","吹風機","吸塵器",
+          "印表機","Wi‑Fi分享器","電視遊樂器","電鋼琴","跑步機","電蚊拍",
+          "鉛筆","木頭椅子","紙本書","毛巾","竹筷子"
+        ]
+      },
+      {
+        name: "會用到嘴巴的事情",
+        items: [
+          "吃飯","喝水","吃藥","刷牙","說話","唱歌","吹蠟燭","吹氣球",
+          "吹口哨","打哈欠","吃冰淇淋","嚐菜","咀嚼口香糖","漱口",
+          "大笑","耳語","吃水果","喝湯","接吻",
+          "用腳踢球","用手鼓掌","用眼睛看電視","用耳朵聽音樂","用鼻子聞花香"
+        ]
+      },
+      {
+        name: "只能用一隻手做的事",
+        items: [
+          "按電鈴","按門鈴對講機","單手滑手機","單手拿遙控器換台",
+          "按電梯按鈕","開關燈","單手拿湯匙喝湯","單手拿叉子吃東西",
+          "單手拿梳子梳頭","單手拿牙刷刷牙","單手擦桌子","拿鑰匙開鎖",
+          "拿門卡刷門禁","單手提購物袋","滑電腦滑鼠","單手自拍",
+          "單手按手機拍照鍵","單手拉抽屜","單手拉拉鍊",
+          "兩手抱棉被","兩手搬桌子","兩手騎腳踏車","兩手打鍵盤","兩手拖地板"
+        ]
+      },
+      {
+        name: "在天上飛的東西",
+        items: [
+          "小鳥","老鷹","麻雀","蝙蝠","蝴蝶","蜜蜂","蒼蠅","飛機",
+          "直升機","滑翔翼","無人機","風箏","熱氣球","雲","雪花",
+          "紙飛機","飛盤","煙火","流星",
+          "狗狗","長頸鹿","石頭","冰箱","沙發"
+        ]
+      },
+      {
+        name: "在廚房裡常見的東西",
+        items: [
+          "炒鍋","湯鍋","菜刀","砧板","鍋鏟","湯勺","筷子","湯匙",
+          "碗","盤子","杯子","電鍋","瓦斯爐","抽油煙機","冰箱",
+          "微波爐","抹布","洗碗精","垃圾桶",
+          "籃球鞋","漫畫書","枕頭","牙醫椅","電梯按鈕"
+        ]
+      },
+      {
+        name: "在浴室裡常見的東西",
+        items: [
+          "牙刷","牙膏","漱口杯","毛巾","浴巾","肥皂","沐浴乳","洗髮精",
+          "蓮蓬頭","洗臉盆","馬桶","馬桶刷","衛生紙","浴室腳踏墊","鏡子",
+          "洗衣籃","洗面乳","刮鬍刀","吹風機",
+          "電視遙控器","滑鼠鍵盤","球鞋鞋盒","書桌檯燈","砂石車"
+        ]
+      },
+      {
+        name: "在診所或醫院會看到的東西",
+        items: [
+          "掛號櫃台","候診椅","號碼牌機","叫號螢幕","醫師白袍",
+          "護理站","聽診器","血壓計","體溫計","體重機","病床","輪椅",
+          "拐杖","點滴架","藥袋","處方箋","檢驗試管","消毒酒精瓶",
+          "衛教海報",
+          "狗狗","長頸鹿","雲霄飛車","漫畫展攤位","冰淇淋推車"
+        ]
+      },
+      {
+        name: "可以在超市買到的東西",
+        items: [
+          "白米","麵條","吐司","牛奶","優酪乳","雞蛋","豆漿",
+          "豆腐","高麗菜","青江菜","蘋果","香蕉","柳橙","餅乾","巧克力",
+          "泡麵","玉米罐頭","冷凍水餃","冰淇淋","洗衣精","衛生紙","垃圾袋","牙膏",
+          "家裡門的鑰匙","我家的棉被","我家的沙發","我朋友本人"
+        ]
+      }
+    ];
+
+    // 狀態變數
+    let timer = 0;
+    let totalSteps = 0;
+    let intervalId = null;
+    let showAnswerTimeout = null;
+    let isRunning = false;
+    let isPaused = false;
+    let musicEnabled = false;
+
+    let lastLoopTime = 0;
+    let lastStepTime = 0;
+    let stepInterval = 60000 / 180;
+    let nextQuestionTime = 0;
+
+    // DOM
+    const cadenceSlider = document.getElementById('cadence');
+    const intervalSlider = document.getElementById('interval');
+    const cadenceValue = document.getElementById('cadenceValue');
+    const intervalValue = document.getElementById('intervalValue');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const musicBtn = document.getElementById('musicBtn');
+    const timerEl = document.getElementById('timer');
+    const topicEl = document.getElementById('topic');
+    const mathEl = document.getElementById('math');
+    const msgEl = document.getElementById('message');
+    const totalStepsEl = document.getElementById('totalSteps');
+    const footstepAudio = document.getElementById('footstep');
+
+    const statsPanelStop = document.getElementById('statsPanelStop');
+    const finalTimeStopEl = document.getElementById('finalTimeStop');
+    const finalStepsStopEl = document.getElementById('finalStepsStop');
+    const restartBtn = document.getElementById('restartBtn');
+
+    const statsPanelPause = document.getElementById('statsPanelPause');
+    const finalTimePauseEl = document.getElementById('finalTimePause');
+    const finalStepsPauseEl = document.getElementById('finalStepsPause');
+    const pauseRestartBtn = document.getElementById('pauseRestartBtn');
+    const resumeBtn = document.getElementById('resumeBtn');
+
+    let ytPlayer = null;
+    function onYouTubeIframeAPIReady() {
+      ytPlayer = new YT.Player('youtubePlayer', {});
+    }
+    (function loadYT() {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    })();
+
+    musicBtn.onclick = () => {
+      musicEnabled = !musicEnabled;
+      if (musicEnabled) {
+        musicBtn.textContent = '🔇 關音樂';
+        musicBtn.classList.add('active');
+        if (isRunning && ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+      } else {
+        musicBtn.textContent = '🎵 音樂';
+        musicBtn.classList.remove('active');
+        if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+      }
+    };
+
+    cadenceSlider.oninput = () => {
+      cadenceValue.textContent = cadenceSlider.value;
+      const cadence = parseInt(cadenceSlider.value, 10);
+      stepInterval = 60000 / cadence;
+    };
+
+    intervalSlider.oninput = () => {
+      intervalValue.textContent = intervalSlider.value + '秒';
+      // 每題秒數在 generateNewQuestion 時讀取
+    };
+
+    function playFootstep() {
+      footstepAudio.currentTime = 0;
+      footstepAudio.play().catch(()=>{});
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60).toString().padStart(2,'0');
+      const s = (seconds % 60).toString().padStart(2,'0');
+      return `${m}:${s}`;
+    }
+
+    function updateTimer() {
+      timerEl.textContent = formatTime(timer);
+    }
+
+    function updateStats() {
+      totalStepsEl.textContent = totalSteps;
+    }
+
+    function randFromArray(arr) {
+      const idx = Math.floor(Math.random() * arr.length);
+      return arr[idx];
+    }
+
+    // 依目前時間決定題組，並抽一題
+    function generateNewQuestion() {
+      const minute = Math.floor(timer / 60);
+      const topicIndex = minute % TOPICS.length;
+      const topic = TOPICS[topicIndex];
+
+      const item = randFromArray(topic.items);
+
+      topicEl.textContent = `題組：${topic.name}`;
+      mathEl.textContent = item;
+      msgEl.textContent = '';
+
+      const qSec = parseInt(intervalSlider.value, 10);
+      nextQuestionTime = timer + qSec;
+    }
+
+    function clearTimers() {
+      if (intervalId) {
+        cancelAnimationFrame(intervalId);
+        intervalId = null;
+      }
+      if (showAnswerTimeout) {
+        clearTimeout(showAnswerTimeout);
+        showAnswerTimeout = null;
+      }
+    }
+
+    function resetGameState() {
+      clearTimers();
+      timer = 0;
+      totalSteps = 0;
+      isRunning = false;
+      isPaused = false;
+      updateTimer();
+      updateStats();
+      topicEl.textContent = "題組：尚未開始";
+      mathEl.textContent = "準備開始…";
+      msgEl.textContent = " ";
+      statsPanelStop.classList.remove('show');
+      statsPanelPause.classList.remove('show');
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      stopBtn.disabled = true;
+    }
+
+    function startLoop() {
+      lastLoopTime = performance.now();
+      lastStepTime = lastLoopTime;
+
+      const firstQSec = parseInt(intervalSlider.value, 10);
+      nextQuestionTime = timer + firstQSec;
+
+      const loop = (now) => {
+        if (!isRunning || isPaused) return;
+
+        const delta = now - lastLoopTime;
+        if (delta >= 1000) {
+          const addSec = Math.floor(delta / 1000);
+          timer += addSec;
+          lastLoopTime += addSec * 1000;
+          updateTimer();
+        }
+
+        if (now - lastStepTime >= stepInterval) {
+          playFootstep();
+          totalSteps++;
+          lastStepTime = now;
+          updateStats();
+        }
+
+        if (timer >= nextQuestionTime) {
+          generateNewQuestion();
+        }
+
+        intervalId = requestAnimationFrame(loop);
+      };
+      intervalId = requestAnimationFrame(loop);
+    }
+
+    function startTimer() {
+      resetGameState();
+      isRunning = true;
+      startBtn.disabled = true;
+      pauseBtn.disabled = false;
+      stopBtn.disabled = false;
+
+      if (musicEnabled && ytPlayer && ytPlayer.playVideo) {
+        ytPlayer.seekTo(0, true);
+        ytPlayer.playVideo();
+      }
+
+      generateNewQuestion();
+      startLoop();
+    }
+
+    function pauseGame() {
+      if (!isRunning || isPaused) return;
+      isPaused = true;
+      clearTimers();
+
+      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+
+      finalTimePauseEl.textContent = formatTime(timer);
+      finalStepsPauseEl.textContent = totalSteps;
+      statsPanelPause.classList.add('show');
+
+      pauseBtn.disabled = true;
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+    }
+
+    function resumeGame() {
+      if (!isRunning || !isPaused) return;
+      isPaused = false;
+      statsPanelPause.classList.remove('show');
+
+      if (musicEnabled && ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+
+      lastLoopTime = performance.now();
+      lastStepTime = lastLoopTime;
+      startLoop();
+
+      pauseBtn.disabled = false;
+      stopBtn.disabled = false;
+    }
+
+    function stopAll() {
+      clearTimers();
+      isRunning = false;
+      isPaused = false;
+
+      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+
+      finalTimeStopEl.textContent = formatTime(timer);
+      finalStepsStopEl.textContent = totalSteps;
+      statsPanelStop.classList.add('show');
+      statsPanelPause.classList.remove('show');
+
+      startBtn.disabled = true;
+      pauseBtn.disabled = true;
+      stopBtn.disabled = true;
+    }
+
+    // 事件綁定
+    startBtn.onclick = () => { if (!isRunning) startTimer(); };
+    pauseBtn.onclick = () => { pauseGame(); };
+    stopBtn.onclick = () => { if (isRunning || isPaused) stopAll(); };
+
+    restartBtn.onclick = () => {
+      statsPanelStop.classList.remove('show');
+      startTimer();
+    };
+
+    pauseRestartBtn.onclick = () => {
+      statsPanelPause.classList.remove('show');
+      startTimer();
+    };
+
+    resumeBtn.onclick = () => { resumeGame(); };
+  </script>
+</body>
+</html>
