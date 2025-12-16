@@ -687,11 +687,6 @@
       intervalValue.textContent = intervalSlider.value + '秒';
     };
 
-    const finalTimeStopEl = document.getElementById('finalTimeStop');
-    const finalStepsStopEl = document.getElementById('finalStepsStop');
-    const finalTimePauseEl = document.getElementById('finalTimePause');
-    const finalStepsPauseEl = document.getElementById('finalStepsPause');
-
     startBtn.onclick = () => { if (!isRunning) startTimer(); };
     pauseBtn.onclick = () => { pauseGame(); };
     stopBtn.onclick = () => { if (isRunning || isPaused) stopAll(); };
