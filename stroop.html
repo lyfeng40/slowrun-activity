@@ -9,7 +9,6 @@
       --bg: #f5f5f0;
       --card: #ffffff;
       --accent: #6c7a89;
-      --accent-soft: #b0b8c2;
       --text-main: #333333;
       --text-sub: #777777;
       --border-soft: #e0e0dd;
@@ -26,7 +25,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 0;
     }
 
     .screen-wrapper {
@@ -60,16 +58,16 @@
       white-space: nowrap;
     }
 
-    /* 上方一列四個滑桿：步頻、訓練等級、規則、秒數 */
+    /* 單列四個控制項：步頻、訓練等級、規則、秒數 */
     .controls-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 16px;
-      flex-wrap: nowrap;
+      gap: 12px;
+      padding: 8px 0;
       border-bottom: 1px solid var(--border-soft);
-      padding-bottom: 8px;
       margin-bottom: 8px;
+      flex-wrap: nowrap;
     }
 
     .control-group {
@@ -79,7 +77,7 @@
     }
 
     .control-label {
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       color: var(--text-sub);
       margin-bottom: 4px;
       letter-spacing: 0.08em;
@@ -87,23 +85,15 @@
     }
 
     .control-value {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       color: var(--accent);
       font-weight: 500;
       margin-bottom: 4px;
-      white-space: nowrap;
-    }
-
-    .control-slider {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
     }
 
     input[type="range"] {
       width: 100%;
-      max-width: 200px;
+      max-width: 160px;
       height: 4px;
       background: #ddd;
       border-radius: 999px;
@@ -123,10 +113,26 @@
     .range-labels {
       display: flex;
       justify-content: space-between;
-      width: 100%;
-      max-width: 200px;
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       color: var(--text-sub);
+      margin-top: 2px;
+    }
+
+    .radio-options {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      flex-wrap: wrap;
+    }
+
+    .radio-options label {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
     }
 
     .buttons {
@@ -180,32 +186,25 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 0;
       position: relative;
+      min-height: 0;
     }
 
     .math-panel {
-      border-radius: 14px;
-      padding: 20px 16px;
       width: 100%;
-      max-width: 900px;
+      max-width: 800px;
       text-align: center;
+      padding: 12px;
     }
 
-    /* 題目字體至少 300px，視螢幕寬度自動下修 */
     #math {
       font-weight: 700;
-      line-height: 1.05;
+      line-height: 1.0;
       white-space: nowrap;
       overflow: hidden;
       max-width: 100%;
-      margin-bottom: 8px;
-      font-size: 300px;
-    }
-
-    /* 不再顯示 Level 提示 */
-    #message {
-      display: none;
+      margin: 0;
+      font-size: 300px; /* 最大 300px，會用 JS 依容器寬度往下調 */
     }
 
     .stats-panel {
@@ -316,18 +315,18 @@
       white-space: nowrap;
     }
 
-    /* 規則切換提示遮罩 */
+    /* 規則切換提示 overlay */
     .rule-overlay {
       position: absolute;
       inset: 0;
       background: rgba(0,0,0,0.5);
       display: flex;
-      align-items: center;
       justify-content: center;
-      z-index: 200;
+      align-items: center;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.7s ease;
+      z-index: 150;
     }
 
     .rule-overlay.show {
@@ -336,26 +335,13 @@
     }
 
     .rule-overlay-text {
-      color: #ffffff;
       font-size: 200px;
       font-weight: 700;
+      color: #000000;
+      background: rgba(255,255,255,0.0);
+      padding: 8px 16px;
+      border-radius: 8px;
       white-space: nowrap;
-      text-align: center;
-    }
-
-    @media (max-width: 768px) {
-      .controls-row {
-        flex-wrap: wrap;
-      }
-      .control-group {
-        flex: 1 1 45%;
-      }
-      #math {
-        font-size: 160px;
-      }
-      .rule-overlay-text {
-        font-size: 80px;
-      }
     }
 
     #youtubePlayer {
@@ -367,11 +353,24 @@
       opacity: 0;
       visibility: hidden;
     }
+
+    @media (max-width: 900px) {
+      #math { font-size: 200px; }
+      .rule-overlay-text { font-size: 120px; }
+    }
+
+    @media (max-width: 768px) {
+      .controls-row { flex-wrap: wrap; }
+      .control-group { flex: 1 1 45%; }
+      #math { font-size: 140px; }
+      .rule-overlay-text { font-size: 80px; }
+    }
   </style>
 </head>
 <body>
   <div class="screen-wrapper">
     <div class="container">
+      <!-- YouTube 音樂 -->
       <iframe id="youtubePlayer"
         src="https://www.youtube.com/embed/Bx2TG99pNVo?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
         frameborder="0"
@@ -379,43 +378,41 @@
         allowfullscreen>
       </iframe>
 
+      <!-- 規則切換提示 overlay -->
+      <div id="ruleOverlay" class="rule-overlay">
+        <div id="ruleOverlayText" class="rule-overlay-text">改叫色</div>
+      </div>
+
       <div class="title">叫色超慢跑體智活動 V1</div>
 
-      <!-- 四個滑桿：步頻、訓練等級、規則、秒數 -->
+      <!-- 單列四個控制項 -->
       <div class="controls-row">
         <!-- 步頻 -->
         <div class="control-group">
           <div class="control-label">步頻</div>
           <div class="control-value" id="cadenceValue">180</div>
-          <div class="control-slider">
-            <input type="range" id="cadence" min="150" max="200" value="180" />
-            <div class="range-labels">
-              <span>150</span><span>200</span>
-            </div>
+          <input type="range" id="cadence" min="150" max="200" value="180" />
+          <div class="range-labels">
+            <span>150</span><span>200</span>
           </div>
         </div>
 
-        <!-- 訓練等級（1~3） -->
+        <!-- 訓練等級 -->
         <div class="control-group">
           <div class="control-label">訓練等級</div>
-          <div class="control-value" id="levelValue">Level I</div>
-          <div class="control-slider">
-            <input type="range" id="levelSlider" min="1" max="3" step="1" value="1" />
-            <div class="range-labels">
-              <span>I</span><span>III</span>
-            </div>
+          <div class="radio-options">
+            <label><input type="radio" name="level" value="1" checked> I</label>
+            <label><input type="radio" name="level" value="2"> II</label>
+            <label><input type="radio" name="level" value="3" disabled> III</label>
           </div>
         </div>
 
-        <!-- 規則（叫字 / 叫色）用滑桿表示兩段 -->
+        <!-- 規則 -->
         <div class="control-group">
           <div class="control-label">規則</div>
-          <div class="control-value" id="ruleValue">叫色</div>
-          <div class="control-slider">
-            <input type="range" id="ruleSlider" min="0" max="1" step="1" value="0" />
-            <div class="range-labels">
-              <span>叫色</span><span>叫字</span>
-            </div>
+          <div class="radio-options">
+            <label><input type="radio" name="rule" value="NAME_COLOR" checked> 叫色</label>
+            <label><input type="radio" name="rule" value="NAME_WORD"> 叫字</label>
           </div>
         </div>
 
@@ -423,11 +420,9 @@
         <div class="control-group">
           <div class="control-label">每題秒數</div>
           <div class="control-value" id="intervalValue">4秒</div>
-          <div class="control-slider">
-            <input type="range" id="interval" min="3" max="10" value="4" />
-            <div class="range-labels">
-              <span>3</span><span>10</span>
-            </div>
+          <input type="range" id="interval" min="3" max="10" value="4" />
+          <div class="range-labels">
+            <span>3</span><span>10</span>
           </div>
         </div>
       </div>
@@ -441,8 +436,7 @@
 
       <div class="math-container">
         <div class="math-panel">
-          <div id="math">準備開始…</div>
-          <div id="message"></div>
+          <div id="math">準備</div>
         </div>
 
         <div id="statsPanelStop" class="stats-panel">
@@ -462,11 +456,6 @@
             <button id="pauseRestartBtn" class="stats-btn">重新開始</button>
             <button id="resumeBtn" class="stats-btn">繼續</button>
           </div>
-        </div>
-
-        <!-- 規則切換提示遮罩 -->
-        <div id="ruleOverlay" class="rule-overlay">
-          <div id="ruleOverlayText" class="rule-overlay-text">改叫色</div>
         </div>
       </div>
 
@@ -488,7 +477,7 @@
   </audio>
 
   <script>
-    function fitTextToOneLine(element, maxFontSize = 300, minFontSize = 100) {
+    function fitTextToOneChar(element, maxFontSize = 300, minFontSize = 80) {
       element.style.fontSize = maxFontSize + "px";
       if (!element.offsetWidth) return;
       const containerWidth = element.parentElement.clientWidth;
@@ -499,19 +488,18 @@
       }
     }
 
-    // 顏色設定：白色改為灰色 (#555555)
-    const COLOR_WORDS = ["紅色", "黃色", "藍色", "綠色", "黑色", "棕色", "紫色", "橙色", "灰色"];
-    const COLOR_VALUES = {
-      "紅色": "#e53935",
-      "黃色": "#fbc02d",
-      "藍色": "#1e88e5",
-      "綠色": "#43a047",
-      "黑色": "#000000",
-      "棕色": "#8d6e63",
-      "紫色": "#8e24aa",
-      "橙色": "#fb8c00",
-      "灰色": "#555555"
-    };
+    // 顏色設定：白色改為灰色（深灰）
+    const COLOR_BASE = [
+      { word: "紅色", char: "紅", color: "#e53935" },
+      { word: "黃色", char: "黃", color: "#fbc02d" },
+      { word: "藍色", char: "藍", color: "#1e88e5" },
+      { word: "綠色", char: "綠", color: "#43a047" },
+      { word: "黑色", char: "黑", color: "#000000" },
+      { word: "棕色", char: "棕", color: "#8d6e63" },
+      { word: "紫色", char: "紫", color: "#8e24aa" },
+      { word: "橙色", char: "橙", color: "#fb8c00" },
+      { word: "灰色", char: "灰", color: "#555555" }
+    ];
 
     function randInt(min,max){
       return Math.floor(Math.random()*(max-min+1))+min;
@@ -521,21 +509,30 @@
       return arr[randInt(0, arr.length - 1)];
     }
 
+    // 產生單一字題（只顯示 char，一樣用 stroop 概念）
     function makeSingleQuestion(isNormal) {
       if (isNormal) {
-        const word = randomPick(COLOR_WORDS);
-        const color = word;
-        return { text: word, color, type: "normal" };
+        const base = randomPick(COLOR_BASE);
+        return {
+          char: base.char,
+          inkColor: base.color,
+          type: "normal"
+        };
       } else {
-        let word, color;
+        let wordBase, colorBase;
         do {
-          word = randomPick(COLOR_WORDS);
-          color = randomPick(COLOR_WORDS);
-        } while (word === color);
-        return { text: word, color, type: "stroop" };
+          wordBase = randomPick(COLOR_BASE);
+          colorBase = randomPick(COLOR_BASE);
+        } while (wordBase.word === colorBase.word);
+        return {
+          char: wordBase.char,
+          inkColor: colorBase.color,
+          type: "stroop"
+        };
       }
     }
 
+    // 依 Level 建立題目列表
     function buildQuestionList(total, level) {
       const list = [];
       while (list.length < total) {
@@ -543,16 +540,13 @@
         if (level === 1) {
           // Level I：1 normal + 3 stroop（1:3）
           group.push(makeSingleQuestion(true));
-          for (let i = 0; i < 3; i++) {
-            group.push(makeSingleQuestion(false));
-          }
+          for (let i = 0; i < 3; i++) group.push(makeSingleQuestion(false));
         } else {
-          // Level II / III 先用 1:5
+          // Level II / III：1 normal + 5 stroop（1:5）
           group.push(makeSingleQuestion(true));
-          for (let i = 0; i < 5; i++) {
-            group.push(makeSingleQuestion(false));
-          }
+          for (let i = 0; i < 5; i++) group.push(makeSingleQuestion(false));
         }
+        // 洗牌 group
         for (let i = group.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [group[i], group[j]] = [group[j], group[i]];
@@ -572,11 +566,12 @@
         currentIndex = 0;
       }
       const q = questions[currentIndex];
-      mathEl.textContent = q.text;
-      mathEl.style.color = COLOR_VALUES[q.color];
-      fitTextToOneLine(mathEl, 300, 100);
+      mathEl.textContent = q.char;
+      mathEl.style.color = q.inkColor;
+      fitTextToOneChar(mathEl, 300, 80);
     }
 
+    // 狀態變數
     let timer = 0;
     let totalSteps = 0;
     let intervalId = null;
@@ -589,19 +584,17 @@
     let stepInterval = 60000 / 180;
     let nextQuestionTime = 0;
 
-    let currentLevel = 1;           // 1,2,3
-    let currentRule = "NAME_COLOR"; // 叫色 / 叫字
+    let currentLevel = 1;           // 1,2 (3 UI存在，尚未實作)
+    let currentRule = "NAME_COLOR";// 叫色 / 叫字
     let totalQuestions = 300;
+
+    const levelRadios = document.querySelectorAll('input[name="level"]');
+    const ruleRadios = document.querySelectorAll('input[name="rule"]');
 
     const cadenceSlider = document.getElementById('cadence');
     const intervalSlider = document.getElementById('interval');
     const cadenceValue = document.getElementById('cadenceValue');
     const intervalValue = document.getElementById('intervalValue');
-    const levelSlider = document.getElementById('levelSlider');
-    const levelValue = document.getElementById('levelValue');
-    const ruleSlider = document.getElementById('ruleSlider');
-    const ruleValue = document.getElementById('ruleValue');
-
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const stopBtn = document.getElementById('stopBtn');
@@ -672,7 +665,8 @@
       isPaused = false;
       updateTimer();
       updateStats();
-      mathEl.innerHTML = '準備開始…';
+      mathEl.textContent = "準備";
+      mathEl.style.color = "#000000";
       statsPanelStop.classList.remove('show');
       statsPanelPause.classList.remove('show');
       startBtn.disabled = false;
@@ -683,9 +677,7 @@
     }
 
     function getCurrentIntervalSeconds() {
-      if (currentLevel === 1) {
-        return 4; // Level I 固定 4 秒
-      }
+      if (currentLevel === 1) return 4;
       const v = parseInt(intervalSlider.value, 10);
       return isNaN(v) ? 4 : v;
     }
@@ -797,18 +789,16 @@
       }
     }
 
-    // 規則切換提示
-    let ruleOverlayTimeout = null;
+    // 規則切換提示 overlay：顯示 5 秒後淡出
     function showRuleOverlay(text) {
       ruleOverlayText.textContent = text;
       ruleOverlay.classList.add('show');
-      if (ruleOverlayTimeout) clearTimeout(ruleOverlayTimeout);
-      ruleOverlayTimeout = setTimeout(() => {
+      setTimeout(() => {
         ruleOverlay.classList.remove('show');
-      }, 1500);
+      }, 5000);
     }
 
-    // 音樂
+    // 音樂按鈕
     musicBtn.onclick = () => {
       musicEnabled = !musicEnabled;
       if (musicEnabled) {
@@ -822,7 +812,6 @@
       }
     };
 
-    // 滑桿事件
     cadenceSlider.oninput = () => {
       cadenceValue.textContent = cadenceSlider.value;
       const cadence = parseInt(cadenceSlider.value, 10);
@@ -833,26 +822,24 @@
       intervalValue.textContent = intervalSlider.value + '秒';
     };
 
-    levelSlider.oninput = () => {
-      const v = parseInt(levelSlider.value, 10);
-      currentLevel = v;
-      if (v === 1) levelValue.textContent = "Level I";
-      else if (v === 2) levelValue.textContent = "Level II";
-      else levelValue.textContent = "Level III";
-    };
+    // Level 選擇（Level III 介面存在，但目前邏輯視同 Level II）
+    levelRadios.forEach(r => {
+      r.addEventListener('change', () => {
+        currentLevel = parseInt(r.value, 10);
+      });
+    });
 
-    ruleSlider.oninput = () => {
-      const v = parseInt(ruleSlider.value, 10);
-      if (v === 0) {
-        currentRule = "NAME_COLOR";
-        ruleValue.textContent = "叫色";
-        showRuleOverlay("改叫色");
-      } else {
-        currentRule = "NAME_WORD";
-        ruleValue.textContent = "叫字";
-        showRuleOverlay("改叫字");
-      }
-    };
+    // 規則選擇：切換時顯示 overlay 提示
+    ruleRadios.forEach(r => {
+      r.addEventListener('change', () => {
+        currentRule = r.value;
+        if (currentRule === "NAME_COLOR") {
+          showRuleOverlay("改叫色");
+        } else {
+          showRuleOverlay("改叫字");
+        }
+      });
+    });
 
     startBtn.onclick = () => { if (!isRunning) startTimer(); };
     pauseBtn.onclick = () => { pauseGame(); };
@@ -871,13 +858,10 @@
     resumeBtn.onclick = () => { resumeGame(); };
 
     // 初始化
-    cadenceValue.textContent = cadenceSlider.value;
-    intervalValue.textContent = intervalSlider.value + "秒";
-    levelValue.textContent = "Level I";
-    ruleValue.textContent = "叫色";
-    questions = buildQuestionList(totalQuestions, currentLevel);
     updateTimer();
     updateStats();
+    questions = buildQuestionList(totalQuestions, currentLevel);
+    fitTextToOneChar(mathEl, 300, 80);
   </script>
 </body>
 </html>
