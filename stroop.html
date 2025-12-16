@@ -6,9 +6,9 @@
   <title>叫色超慢跑體智活動 V1（16:9）</title>
   <style>
     :root {
-      --bg: #f5f5f0;           /* 淺米白 */
+      --bg: #f5f5f0;
       --card: #ffffff;
-      --accent: #6c7a89;       /* 低飽和灰藍 */
+      --accent: #6c7a89;
       --accent-soft: #b0b8c2;
       --text-main: #333333;
       --text-sub: #777777;
@@ -60,22 +60,16 @@
       white-space: nowrap;
     }
 
-    /* 上方控制列：分兩層，第一層 Level & 規則，第二層 步頻 & 秒數 */
-    .controls-block {
-      border-bottom: 1px solid var(--border-soft);
-      padding-bottom: 8px;
-      margin-bottom: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
+    /* 單一列：步頻 | 等級+規則 | 秒數 */
     .controls-row {
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
       align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
+      gap: 12px;
+      flex-wrap: nowrap;
+      padding: 8px 0 10px;
+      border-bottom: 1px solid var(--border-soft);
+      margin-bottom: 8px;
     }
 
     .control-group {
@@ -123,6 +117,10 @@
       margin-top: 2px;
     }
 
+    .level-rule-wrapper {
+      min-width: 260px;
+    }
+
     .level-options,
     .rule-options {
       display: flex;
@@ -130,6 +128,7 @@
       gap: 10px;
       font-size: 0.85rem;
       color: var(--text-sub);
+      margin-bottom: 4px;
     }
 
     .level-options label,
@@ -203,6 +202,7 @@
       text-align: center;
     }
 
+    /* 題目字體至少 300px，之後只會往下縮 */
     #math {
       font-weight: 700;
       line-height: 1.05;
@@ -210,7 +210,7 @@
       overflow: hidden;
       max-width: 100%;
       margin-bottom: 8px;
-      font-size: 110px;
+      font-size: 300px;
     }
 
     #message {
@@ -218,11 +218,7 @@
       color: var(--text-sub);
       min-height: 1.2em;
       text-align: center;
-    }
-
-    .message-note {
-      font-size: 0.75rem;
-      color: var(--text-sub);
+      visibility: hidden; /* 題目提示不再顯示 */
     }
 
     .stats-panel {
@@ -333,12 +329,49 @@
       white-space: nowrap;
     }
 
+    /* 規則切換提示 overlay */
+    .rule-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .rule-overlay.show {
+      display: flex;
+    }
+
+    .rule-overlay-box {
+      background: #ffffff;
+      padding: 16px 24px;
+      border-radius: 12px;
+      text-align: center;
+      min-width: 260px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    .rule-overlay-title {
+      font-size: 1rem;
+      color: var(--accent);
+      margin-bottom: 6px;
+      letter-spacing: 0.12em;
+    }
+
+    .rule-overlay-text {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
     @media (max-width: 768px) {
-      .controls-row { flex-direction: column; }
-      .control-group { min-width: 220px; }
-      input[type="range"] { width: 180px; }
+      .controls-row { flex-wrap: wrap; }
+      .control-group { min-width: 180px; }
+      input[type="range"] { width: 160px; }
       .math-panel { padding: 16px 10px; }
-      #math { font-size: 72px; }
+      #math { font-size: 160px; }
       .stats-panel { width: 90%; }
     }
 
@@ -365,43 +398,35 @@
 
       <div class="title">叫色超慢跑體智活動 V1</div>
 
-      <div class="controls-block">
-        <!-- 第一列：Level + 規則 -->
-        <div class="controls-row">
-          <div class="control-group">
-            <div class="control-label">訓練等級</div>
-            <div class="level-options">
-              <label><input type="radio" name="level" value="1" checked> Level I</label>
-              <label><input type="radio" name="level" value="2"> Level II</label>
-              <label><input type="radio" name="level" value="3" disabled> Level III</label>
-            </div>
-          </div>
-          <div class="control-group">
-            <div class="control-label">規則</div>
-            <div class="rule-options">
-              <label><input type="radio" name="rule" value="NAME_COLOR" checked> 叫色</label>
-              <label><input type="radio" name="rule" value="NAME_WORD"> 叫字</label>
-            </div>
+      <div class="controls-row">
+        <div class="control-group">
+          <div class="control-label">步頻</div>
+          <div class="control-value" id="cadenceValue">180</div>
+          <input type="range" id="cadence" min="150" max="200" value="180" />
+          <div class="range-labels">
+            <span>150</span><span>200</span>
           </div>
         </div>
 
-        <!-- 第二列：步頻 + 每題秒數 -->
-        <div class="controls-row">
-          <div class="control-group">
-            <div class="control-label">步頻</div>
-            <div class="control-value" id="cadenceValue">180</div>
-            <input type="range" id="cadence" min="150" max="200" value="180" />
-            <div class="range-labels">
-              <span>150</span><span>200</span>
-            </div>
+        <div class="control-group level-rule-wrapper">
+          <div class="control-label">訓練等級 & 規則</div>
+          <div class="level-options">
+            <label><input type="radio" name="level" value="1" checked> Level I</label>
+            <label><input type="radio" name="level" value="2"> Level II</label>
+            <label><input type="radio" name="level" value="3" disabled> Level III</label>
           </div>
-          <div class="control-group">
-            <div class="control-label">每題秒數</div>
-            <div class="control-value" id="intervalValue">4秒</div>
-            <input type="range" id="interval" min="3" max="10" value="4" />
-            <div class="range-labels">
-              <span>3</span><span>10</span>
-            </div>
+          <div class="rule-options">
+            <label><input type="radio" name="rule" value="NAME_COLOR" checked> 叫色</label>
+            <label><input type="radio" name="rule" value="NAME_WORD"> 叫字</label>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">每題秒數</div>
+          <div class="control-value" id="intervalValue">4秒</div>
+          <input type="range" id="interval" min="3" max="10" value="4" />
+          <div class="range-labels">
+            <span>3</span><span>10</span>
           </div>
         </div>
       </div>
@@ -416,7 +441,7 @@
       <div class="math-container">
         <div class="math-panel">
           <div id="math">準備開始…</div>
-          <div id="message" class="message-note">Level I：暖身（1:3，單字，4秒）</div>
+          <div id="message">&nbsp;</div>
         </div>
 
         <div id="statsPanelStop" class="stats-panel">
@@ -435,6 +460,14 @@
           <div class="stats-buttons">
             <button id="pauseRestartBtn" class="stats-btn">重新開始</button>
             <button id="resumeBtn" class="stats-btn">繼續</button>
+          </div>
+        </div>
+
+        <!-- 規則切換提示 overlay -->
+        <div id="ruleOverlay" class="rule-overlay">
+          <div class="rule-overlay-box">
+            <div class="rule-overlay-title">規則切換</div>
+            <div class="rule-overlay-text" id="ruleOverlayText">請看顏色（叫色）</div>
           </div>
         </div>
       </div>
@@ -457,7 +490,7 @@
   </audio>
 
   <script>
-    function fitTextToOneLine(element, maxFontSize = 120, minFontSize = 60) {
+    function fitTextToOneLine(element, maxFontSize = 300, minFontSize = 100) {
       element.style.fontSize = maxFontSize + "px";
       if (!element.offsetWidth) return;
       const containerWidth = element.parentElement.clientWidth;
@@ -468,8 +501,7 @@
       }
     }
 
-    // ===== 叫色題目設定 =====
-    // 白色改成「灰色」(#555555)
+    // 顏色設定（白色改深灰）
     const COLOR_WORDS = ["紅色", "黃色", "藍色", "綠色", "黑色", "棕色", "紫色", "橙色", "灰色"];
     const COLOR_VALUES = {
       "紅色": "#e53935",
@@ -491,11 +523,10 @@
       return arr[randInt(0, arr.length - 1)];
     }
 
-    // 單一字題
     function makeSingleQuestion(isNormal) {
       if (isNormal) {
         const word = randomPick(COLOR_WORDS);
-        const color = word;  // 一致
+        const color = word;
         return { text: word, color, type: "normal" };
       } else {
         let word, color;
@@ -507,25 +538,23 @@
       }
     }
 
-    // 依 Level 建立題目列表
     function buildQuestionList(total, level) {
       const list = [];
       while (list.length < total) {
         const group = [];
         if (level === 1) {
-          // Level I：1 normal + 3 stroop（1:3）
+          // Level I：1 normal + 3 stroop
           group.push(makeSingleQuestion(true));
           for (let i = 0; i < 3; i++) {
             group.push(makeSingleQuestion(false));
           }
         } else {
-          // Level II（以及暫時的 Level III）：1 normal + 5 stroop（1:5）
+          // Level II/III：1 normal + 5 stroop
           group.push(makeSingleQuestion(true));
           for (let i = 0; i < 5; i++) {
             group.push(makeSingleQuestion(false));
           }
         }
-        // 洗牌 group
         for (let i = group.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [group[i], group[j]] = [group[j], group[i]];
@@ -547,10 +576,9 @@
       const q = questions[currentIndex];
       mathEl.textContent = q.text;
       mathEl.style.color = COLOR_VALUES[q.color];
-      fitTextToOneLine(mathEl, 120, 60);
+      fitTextToOneLine(mathEl, 300, 100);
     }
 
-    // ===== 狀態變數 =====
     let timer = 0;
     let totalSteps = 0;
     let intervalId = null;
@@ -563,8 +591,8 @@
     let stepInterval = 60000 / 180;
     let nextQuestionTime = 0;
 
-    let currentLevel = 1;              // 1 or 2（3 先保留）
-    let currentRule = "NAME_COLOR";    // 叫色 / 叫字（先只記錄）
+    let currentLevel = 1;
+    let currentRule = "NAME_COLOR";
     let totalQuestions = 300;
 
     const levelRadios = document.querySelectorAll('input[name="level"]');
@@ -594,6 +622,9 @@
     const finalStepsPauseEl = document.getElementById('finalStepsPause');
     const pauseRestartBtn = document.getElementById('pauseRestartBtn');
     const resumeBtn = document.getElementById('resumeBtn');
+
+    const ruleOverlay = document.getElementById('ruleOverlay');
+    const ruleOverlayText = document.getElementById('ruleOverlayText');
 
     let ytPlayer = null;
 
@@ -634,16 +665,6 @@
       }
     }
 
-    function updateLevelHint() {
-      if (currentLevel === 1) {
-        msgEl.textContent = "Level I：暖身（1:3，單字，4秒）";
-      } else if (currentLevel === 2) {
-        msgEl.textContent = "Level II：標準訓練（1:5，單字，可調秒數）";
-      } else {
-        msgEl.textContent = "Level III：困難版（尚未啟用）";
-      }
-    }
-
     function resetGameState() {
       clearTimers();
       timer = 0;
@@ -653,7 +674,7 @@
       updateTimer();
       updateStats();
       mathEl.innerHTML = '準備開始…';
-      updateLevelHint();
+      msgEl.textContent = ' ';
       statsPanelStop.classList.remove('show');
       statsPanelPause.classList.remove('show');
       startBtn.disabled = false;
@@ -661,6 +682,14 @@
       stopBtn.disabled = true;
       questions = buildQuestionList(totalQuestions, currentLevel);
       currentIndex = -1;
+    }
+
+    function getCurrentIntervalSeconds() {
+      if (currentLevel === 1) {
+        return 4;
+      }
+      const v = parseInt(intervalSlider.value, 10);
+      return isNaN(v) ? 4 : v;
     }
 
     function startLoop() {
@@ -697,15 +726,6 @@
         intervalId = requestAnimationFrame(loop);
       };
       intervalId = requestAnimationFrame(loop);
-    }
-
-    // 根據 Level 取用實際每題秒數
-    function getCurrentIntervalSeconds() {
-      if (currentLevel === 1) {
-        return 4; // 固定 4 秒
-      }
-      const v = parseInt(intervalSlider.value, 10);
-      return isNaN(v) ? 4 : v;
     }
 
     function startTimer() {
@@ -779,6 +799,16 @@
       }
     }
 
+    // 規則切換 overlay 顯示（約 1 秒）
+    function showRuleOverlay() {
+      const text = (currentRule === "NAME_COLOR") ? "請看顏色（叫色）" : "請看字詞（叫字）";
+      ruleOverlayText.textContent = text;
+      ruleOverlay.classList.add('show');
+      setTimeout(() => {
+        ruleOverlay.classList.remove('show');
+      }, 1000);
+    }
+
     // 音樂按鈕
     musicBtn.onclick = () => {
       musicEnabled = !musicEnabled;
@@ -807,19 +837,16 @@
       intervalValue.textContent = intervalSlider.value + '秒';
     };
 
-    // Level 選擇
     levelRadios.forEach(r => {
       r.addEventListener('change', () => {
         currentLevel = parseInt(r.value, 10);
-        // Level I 固定 4 秒，可以在 UI 顯示但程式用 4 秒
-        updateLevelHint();
       });
     });
 
-    // 規則選擇（目前只記錄，未用於評分）
     ruleRadios.forEach(r => {
       r.addEventListener('change', () => {
         currentRule = r.value;
+        showRuleOverlay();
       });
     });
 
@@ -840,7 +867,6 @@
     resumeBtn.onclick = () => { resumeGame(); };
 
     // 初始化
-    updateLevelHint();
     questions = buildQuestionList(totalQuestions, currentLevel);
   </script>
 </body>
