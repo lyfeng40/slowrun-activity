@@ -29,7 +29,6 @@
       padding: 0;
     }
 
-    /* 16:9 外框，簡潔白底+淡陰影 */
     .screen-wrapper {
       width: 90vw;
       max-width: 1280px;
@@ -57,17 +56,26 @@
       font-weight: 500;
       letter-spacing: 0.15em;
       color: var(--accent);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       white-space: nowrap;
     }
 
-    .controls-top {
+    /* 上方控制列：分兩層，第一層 Level & 規則，第二層 步頻 & 秒數 */
+    .controls-block {
+      border-bottom: 1px solid var(--border-soft);
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .controls-row {
       display: flex;
       justify-content: space-around;
       align-items: center;
-      padding: 10px 0 10px;
-      border-bottom: 1px solid var(--border-soft);
-      margin-bottom: 8px;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
     .control-group {
@@ -83,7 +91,7 @@
     }
 
     .control-value {
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: var(--accent);
       font-weight: 500;
       margin-bottom: 4px;
@@ -113,6 +121,23 @@
       font-size: 0.7rem;
       color: var(--text-sub);
       margin-top: 2px;
+    }
+
+    .level-options,
+    .rule-options {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
+    .level-options label,
+    .rule-options label {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .buttons {
@@ -178,7 +203,6 @@
       text-align: center;
     }
 
-    /* 題目字體超大，投影用 */
     #math {
       font-weight: 700;
       line-height: 1.05;
@@ -186,14 +210,19 @@
       overflow: hidden;
       max-width: 100%;
       margin-bottom: 8px;
-      font-size: 110px; /* 基本就很大，後面 JS 只會往下調整 */
+      font-size: 110px;
     }
 
     #message {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: var(--text-sub);
       min-height: 1.2em;
-      visibility: hidden;   /* 不顯示提示文字 */
+      text-align: center;
+    }
+
+    .message-note {
+      font-size: 0.75rem;
+      color: var(--text-sub);
     }
 
     .stats-panel {
@@ -305,7 +334,7 @@
     }
 
     @media (max-width: 768px) {
-      .controls-top { flex-direction: column; gap: 10px; }
+      .controls-row { flex-direction: column; }
       .control-group { min-width: 220px; }
       input[type="range"] { width: 180px; }
       .math-panel { padding: 16px 10px; }
@@ -327,7 +356,6 @@
 <body>
   <div class="screen-wrapper">
     <div class="container">
-      <!-- 指定的 YouTube 音樂（跑步 150 BPM） -->
       <iframe id="youtubePlayer"
         src="https://www.youtube.com/embed/Bx2TG99pNVo?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
         frameborder="0"
@@ -337,21 +365,43 @@
 
       <div class="title">叫色超慢跑體智活動 V1</div>
 
-      <div class="controls-top">
-        <div class="control-group">
-          <div class="control-label">步頻</div>
-          <div class="control-value" id="cadenceValue">180</div>
-          <input type="range" id="cadence" min="150" max="200" value="180" />
-          <div class="range-labels">
-            <span>150</span><span>200</span>
+      <div class="controls-block">
+        <!-- 第一列：Level + 規則 -->
+        <div class="controls-row">
+          <div class="control-group">
+            <div class="control-label">訓練等級</div>
+            <div class="level-options">
+              <label><input type="radio" name="level" value="1" checked> Level I</label>
+              <label><input type="radio" name="level" value="2"> Level II</label>
+              <label><input type="radio" name="level" value="3" disabled> Level III</label>
+            </div>
+          </div>
+          <div class="control-group">
+            <div class="control-label">規則</div>
+            <div class="rule-options">
+              <label><input type="radio" name="rule" value="NAME_COLOR" checked> 叫色</label>
+              <label><input type="radio" name="rule" value="NAME_WORD"> 叫字</label>
+            </div>
           </div>
         </div>
-        <div class="control-group">
-          <div class="control-label">每題秒數</div>
-          <div class="control-value" id="intervalValue">4秒</div>
-          <input type="range" id="interval" min="3" max="10" value="4" />
-          <div class="range-labels">
-            <span>3</span><span>10</span>
+
+        <!-- 第二列：步頻 + 每題秒數 -->
+        <div class="controls-row">
+          <div class="control-group">
+            <div class="control-label">步頻</div>
+            <div class="control-value" id="cadenceValue">180</div>
+            <input type="range" id="cadence" min="150" max="200" value="180" />
+            <div class="range-labels">
+              <span>150</span><span>200</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <div class="control-label">每題秒數</div>
+            <div class="control-value" id="intervalValue">4秒</div>
+            <input type="range" id="interval" min="3" max="10" value="4" />
+            <div class="range-labels">
+              <span>3</span><span>10</span>
+            </div>
           </div>
         </div>
       </div>
@@ -366,7 +416,7 @@
       <div class="math-container">
         <div class="math-panel">
           <div id="math">準備開始…</div>
-          <div id="message">&nbsp;</div>
+          <div id="message" class="message-note">Level I：暖身（1:3，單字，4秒）</div>
         </div>
 
         <div id="statsPanelStop" class="stats-panel">
@@ -419,17 +469,18 @@
     }
 
     // ===== 叫色題目設定 =====
-    const COLOR_WORDS = ["紅色", "黃色", "藍色", "綠色", "黑色", "白色", "棕色", "紫色", "橙色"];
+    // 白色改成「灰色」(#555555)
+    const COLOR_WORDS = ["紅色", "黃色", "藍色", "綠色", "黑色", "棕色", "紫色", "橙色", "灰色"];
     const COLOR_VALUES = {
-      "紅色": "red",
-      "黃色": "yellow",
-      "藍色": "blue",
-      "綠色": "green",
-      "黑色": "black",
-      "白色": "white",
-      "棕色": "brown",
-      "紫色": "purple",
-      "橙色": "orange"
+      "紅色": "#e53935",
+      "黃色": "#fbc02d",
+      "藍色": "#1e88e5",
+      "綠色": "#43a047",
+      "黑色": "#000000",
+      "棕色": "#8d6e63",
+      "紫色": "#8e24aa",
+      "橙色": "#fb8c00",
+      "灰色": "#555555"
     };
 
     function randInt(min,max){
@@ -440,10 +491,11 @@
       return arr[randInt(0, arr.length - 1)];
     }
 
-    function makeQuestion(isNormal) {
+    // 單一字題
+    function makeSingleQuestion(isNormal) {
       if (isNormal) {
         const word = randomPick(COLOR_WORDS);
-        const color = word;
+        const color = word;  // 一致
         return { text: word, color, type: "normal" };
       } else {
         let word, color;
@@ -455,14 +507,25 @@
       }
     }
 
-    function buildQuestionList(total = 40) {
+    // 依 Level 建立題目列表
+    function buildQuestionList(total, level) {
       const list = [];
       while (list.length < total) {
         const group = [];
-        group.push(makeQuestion(true));
-        for (let i = 0; i < 3; i++) {
-          group.push(makeQuestion(false));
+        if (level === 1) {
+          // Level I：1 normal + 3 stroop（1:3）
+          group.push(makeSingleQuestion(true));
+          for (let i = 0; i < 3; i++) {
+            group.push(makeSingleQuestion(false));
+          }
+        } else {
+          // Level II（以及暫時的 Level III）：1 normal + 5 stroop（1:5）
+          group.push(makeSingleQuestion(true));
+          for (let i = 0; i < 5; i++) {
+            group.push(makeSingleQuestion(false));
+          }
         }
+        // 洗牌 group
         for (let i = group.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [group[i], group[j]] = [group[j], group[i]];
@@ -478,17 +541,16 @@
     function showQuestion() {
       currentIndex++;
       if (currentIndex >= questions.length) {
-        questions = buildQuestionList(40);
+        questions = buildQuestionList(totalQuestions, currentLevel);
         currentIndex = 0;
       }
       const q = questions[currentIndex];
       mathEl.textContent = q.text;
       mathEl.style.color = COLOR_VALUES[q.color];
-      // 不顯示任何提示，只單純呈現顏色字
       fitTextToOneLine(mathEl, 120, 60);
     }
 
-    // ===== 計時與步頻邏輯 =====
+    // ===== 狀態變數 =====
     let timer = 0;
     let totalSteps = 0;
     let intervalId = null;
@@ -500,6 +562,13 @@
     let lastStepTime = 0;
     let stepInterval = 60000 / 180;
     let nextQuestionTime = 0;
+
+    let currentLevel = 1;              // 1 or 2（3 先保留）
+    let currentRule = "NAME_COLOR";    // 叫色 / 叫字（先只記錄）
+    let totalQuestions = 300;
+
+    const levelRadios = document.querySelectorAll('input[name="level"]');
+    const ruleRadios = document.querySelectorAll('input[name="rule"]');
 
     const cadenceSlider = document.getElementById('cadence');
     const intervalSlider = document.getElementById('interval');
@@ -565,6 +634,16 @@
       }
     }
 
+    function updateLevelHint() {
+      if (currentLevel === 1) {
+        msgEl.textContent = "Level I：暖身（1:3，單字，4秒）";
+      } else if (currentLevel === 2) {
+        msgEl.textContent = "Level II：標準訓練（1:5，單字，可調秒數）";
+      } else {
+        msgEl.textContent = "Level III：困難版（尚未啟用）";
+      }
+    }
+
     function resetGameState() {
       clearTimers();
       timer = 0;
@@ -574,13 +653,13 @@
       updateTimer();
       updateStats();
       mathEl.innerHTML = '準備開始…';
-      msgEl.textContent = ' ';
+      updateLevelHint();
       statsPanelStop.classList.remove('show');
       statsPanelPause.classList.remove('show');
       startBtn.disabled = false;
       pauseBtn.disabled = true;
       stopBtn.disabled = true;
-      questions = buildQuestionList(40);
+      questions = buildQuestionList(totalQuestions, currentLevel);
       currentIndex = -1;
     }
 
@@ -588,7 +667,7 @@
       lastLoopTime = performance.now();
       lastStepTime = lastLoopTime;
 
-      const firstQSec = parseInt(intervalSlider.value, 10);
+      const firstQSec = getCurrentIntervalSeconds();
       nextQuestionTime = timer + firstQSec;
 
       const loop = (now) => {
@@ -611,13 +690,22 @@
 
         if (timer >= nextQuestionTime) {
           showQuestion();
-          const qSec = parseInt(intervalSlider.value, 10);
+          const qSec = getCurrentIntervalSeconds();
           nextQuestionTime = timer + qSec;
         }
 
         intervalId = requestAnimationFrame(loop);
       };
       intervalId = requestAnimationFrame(loop);
+    }
+
+    // 根據 Level 取用實際每題秒數
+    function getCurrentIntervalSeconds() {
+      if (currentLevel === 1) {
+        return 4; // 固定 4 秒
+      }
+      const v = parseInt(intervalSlider.value, 10);
+      return isNaN(v) ? 4 : v;
     }
 
     function startTimer() {
@@ -628,9 +716,13 @@
       stopBtn.disabled = false;
 
       showQuestion();
-      const qSec = parseInt(intervalSlider.value, 10);
+      const qSec = getCurrentIntervalSeconds();
       nextQuestionTime = timer + qSec;
       startLoop();
+
+      if (musicEnabled && ytPlayer && ytPlayer.playVideo) {
+        ytPlayer.playVideo();
+      }
     }
 
     function pauseGame() {
@@ -687,7 +779,7 @@
       }
     }
 
-    // 音樂按鈕：切換狀態 + 控制 YouTube
+    // 音樂按鈕
     musicBtn.onclick = () => {
       musicEnabled = !musicEnabled;
       if (musicEnabled) {
@@ -715,6 +807,22 @@
       intervalValue.textContent = intervalSlider.value + '秒';
     };
 
+    // Level 選擇
+    levelRadios.forEach(r => {
+      r.addEventListener('change', () => {
+        currentLevel = parseInt(r.value, 10);
+        // Level I 固定 4 秒，可以在 UI 顯示但程式用 4 秒
+        updateLevelHint();
+      });
+    });
+
+    // 規則選擇（目前只記錄，未用於評分）
+    ruleRadios.forEach(r => {
+      r.addEventListener('change', () => {
+        currentRule = r.value;
+      });
+    });
+
     startBtn.onclick = () => { if (!isRunning) startTimer(); };
     pauseBtn.onclick = () => { pauseGame(); };
     stopBtn.onclick = () => { if (isRunning || isPaused) stopAll(); };
@@ -730,6 +838,10 @@
     };
 
     resumeBtn.onclick = () => { resumeGame(); };
+
+    // 初始化
+    updateLevelHint();
+    questions = buildQuestionList(totalQuestions, currentLevel);
   </script>
 </body>
 </html>
