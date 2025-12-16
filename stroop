@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>數學超慢跑體智活動 V11（16:9 螢幕版）</title>
+  <style>
+    :root {
+      --bg: #000000;
+      --card: #1e1e1e;
+      --accent: #4a90e2;
+      --accent-soft: #f5a623;
+      --text-main: #f5f5f5;
+      --text-sub: #cccccc;
+      --text-light: rgba(204, 204, 204, 0.4);
+      --answer: #ffd54f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--bg);          /* 外面全黑，像電影院 */
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+    }
+
+    /* 16:9 螢幕框 */
+    .screen-wrapper {
+      width: 90vw;                   /* 視窗寬度的 90% */
+      max-width: 1280px;
+      aspect-ratio: 16 / 9;          /* 固定 16:9 比例 */
+      background: #111;
+      border-radius: 18px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.8);
+      overflow: hidden;
+      display: flex;
+    }
+
+    .container {
+      width: 100%;
+      height: 100%;
+      background: var(--card);
+      border-radius: 18px;
+      padding: 16px 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent-soft);
+      margin-bottom: 6px;
+      white-space: nowrap;
+    }
+
+    .controls-top {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 6px 0 10px;
+      border-bottom: 1px solid #333;
+      margin-bottom: 6px;
+    }
+
+    .control-group {
+      text-align: center;
+      min-width: 140px;
+    }
+
+    .control-label {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      margin-bottom: 2px;
+    }
+
+    .control-value {
+      font-size: 1.1rem;
+      color: var(--accent-soft);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    input[type="range"] {
+      width: 120px;
+      height: 6px;
+      accent-color: var(--accent);
+      border-radius: 3px;
+      margin-bottom: 0;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: var(--text-light);
+      margin-top: 0;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 8px 0 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 22px;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex: 1;
+      max-width: 110px;
+      white-space: nowrap;
+    }
+
+    #startBtn {
+      background: linear-gradient(135deg, var(--accent), #357abd);
+      color: white;
+      box-shadow: 0 4px 12px rgba(74,144,226,0.4);
+    }
+
+    #pauseBtn, #stopBtn, #musicBtn {
+      background: #444;
+      color: var(--text-main);
+    }
+
+    #musicBtn.active {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      box-shadow: 0 4px 12px rgba(76,175,80,0.4);
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    button:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+    }
+
+    .math-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 0;
+      position: relative;
+    }
+
+    .math-panel {
+      background: rgba(0,0,0,0.2);
+      border-radius: 14px;
+      padding: 14px 12px;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+    }
+
+    #math {
+      font-weight: 800;
+      line-height: 1.05;
+      white-space: nowrap;
+      overflow: hidden;
+      max-width: 100%;
+      margin-bottom: 4px;
+    }
+
+    #message {
+      font-size: 1rem;
+      color: var(--text-sub);
+      min-height: 1.2em;
+    }
+
+    .stats-panel {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 70%;
+      max-width: 360px;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+      border: 2px solid var(--accent);
+      border-radius: 16px;
+      padding: 16px 14px;
+      text-align: center;
+      z-index: 100;
+      box-sizing: border-box;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .stats-panel.show {
+      display: flex;
+    }
+
+    .stats-title {
+      margin: 0;
+      color: var(--accent-soft);
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .stat-line {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      line-height: 1.4;
+      margin: 2px 0;
+    }
+
+    .stat-value {
+      color: var(--accent-soft);
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    .stats-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 6px;
+      flex-wrap: nowrap;
+    }
+
+    .stats-btn {
+      flex: 1;
+      min-width: 0;
+    }
+
+    #restartBtn, #pauseRestartBtn {
+      background: linear-gradient(135deg, var(--accent-soft), #d98c1a);
+      color: white;
+    }
+
+    #resumeBtn {
+      background: linear-gradient(135deg, var(--accent), #357abd);
+      color: white;
+    }
+
+    .bottom-wrapper {
+      border-top: 1px solid #333;
+      padding-top: 4px;
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .bottom-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .timer-small {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .steps-text {
+      font-size: 0.85rem;
+      color: var(--accent-soft);
+    }
+
+    .footer {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      font-size: 0.75rem;
+      color: var(--accent-soft);
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+
+    .answer { 
+      color: var(--answer) !important; 
+      animation: glow 1.5s ease-in-out infinite alternate; 
+    }
+    
+    @keyframes glow {
+      from { text-shadow: 0 0 10px var(--answer); }
+      to { text-shadow: 0 0 20px var(--answer), 0 0 30px var(--answer); }
+    }
+
+    @media (max-width: 768px) {
+      .controls-top { flex-direction: column; gap: 6px; }
+      .control-group { min-width: 220px; }
+      input[type="range"] { width: 180px; }
+      .math-panel { padding: 12px 8px; }
+      #math { font-size: 2.2rem; }
+      .stats-panel { width: 80%; }
+    }
+
+    #youtubePlayer {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      visibility: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div class="screen-wrapper">
+    <div class="container">
+      <iframe id="youtubePlayer"
+        src="https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen>
+      </iframe>
+
+      <div class="title">數學超慢跑體智活動 V11</div>
+
+      <div class="controls-top">
+        <div class="control-group">
+          <div class="control-label">步頻</div>
+          <div class="control-value" id="cadenceValue">180</div>
+          <input type="range" id="cadence" min="150" max="200" value="180" />
+          <div class="range-labels">
+            <span>150</span><span>200</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="control-label">每題秒數</div>
+          <div class="control-value" id="intervalValue">4秒</div>
+          <input type="range" id="interval" min="3" max="10" value="4" />
+          <div class="range-labels">
+            <span>3</span><span>10</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button id="startBtn">▶️ 開始</button>
+        <button id="pauseBtn" disabled>⏸️ 暫停</button>
+        <button id="stopBtn" disabled>⏹️ 停止</button>
+        <button id="musicBtn">🎵 音樂</button>
+      </div>
+
+      <div class="math-container">
+        <div class="math-panel">
+          <div id="math">準備開始…</div>
+          <div id="message">&nbsp;</div>
+        </div>
+
+        <div id="statsPanelStop" class="stats-panel">
+          <h3 class="stats-title">🎉 練習結束</h3>
+          <div class="stat-line">總時間：<span class="stat-value" id="finalTimeStop">--</span></div>
+          <div class="stat-line">總步數：<span class="stat-value" id="finalStepsStop">--</span></div>
+          <div class="stats-buttons">
+            <button id="restartBtn" class="stats-btn">🔄 重新開始</button>
+          </div>
+        </div>
+
+        <div id="statsPanelPause" class="stats-panel">
+          <h3 class="stats-title">⏸️ 已暫停</h3>
+          <div class="stat-line">目前時間：<span class="stat-value" id="finalTimePause">--</span></div>
+          <div class="stat-line">目前步數：<span class="stat-value" id="finalStepsPause">--</span></div>
+          <div class="stats-buttons">
+            <button id="pauseRestartBtn" class="stats-btn">🔄 重新開始</button>
+            <button id="resumeBtn" class="stats-btn">▶️ 繼續</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-wrapper">
+        <div class="bottom-stats">
+          <div class="timer-small" id="timer">00:00</div>
+          <div class="steps-text">步數：<span id="totalSteps">0</span></div>
+        </div>
+        <div class="footer">
+          <div>製作者：FENG職能治療師</div>
+          <div>版本：V11（16:9）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <audio id="footstep" preload="auto">
+    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoAAAAA=" type="audio/wav">
+  </audio>
+
+  <script>
+    function fitTextToOneLine(element, maxFontSize = 56, minFontSize = 18) {
+      element.style.fontSize = maxFontSize + "px";
+      if (!element.offsetWidth) return;
+      const containerWidth = element.parentElement.clientWidth;
+      let currentSize = maxFontSize;
+      while (element.scrollWidth > containerWidth && currentSize > minFontSize) {
+        currentSize -= 2;
+        element.style.fontSize = currentSize + "px";
+      }
+    }
+
+    let timer = 0;
+    let totalSteps = 0;
+    let intervalId = null;
+    let currentProblem = {};
+    let showAnswerTimeout = null;
+    let isRunning = false;
+    let isPaused = false;
+    let musicEnabled = false;
+
+    let lastLoopTime = 0;
+    let lastStepTime = 0;
+    let stepInterval = 60000 / 180;
+    let nextQuestionTime = 0;
+
+    const cadenceSlider = document.getElementById('cadence');
+    const intervalSlider = document.getElementById('interval');
+    const cadenceValue = document.getElementById('cadenceValue');
+    const intervalValue = document.getElementById('intervalValue');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const musicBtn = document.getElementById('musicBtn');
+    const timerEl = document.getElementById('timer');
+    const mathEl = document.getElementById('math');
+    const msgEl = document.getElementById('message');
+    const totalStepsEl = document.getElementById('totalSteps');
+    const footstepAudio = document.getElementById('footstep');
+
+    const statsPanelStop = document.getElementById('statsPanelStop');
+    const finalTimeStopEl = document.getElementById('finalTimeStop');
+    const finalStepsStopEl = document.getElementById('finalStepsStop');
+    const restartBtn = document.getElementById('restartBtn');
+
+    const statsPanelPause = document.getElementById('statsPanelPause');
+    const finalTimePauseEl = document.getElementById('finalTimePause');
+    const finalStepsPauseEl = document.getElementById('finalStepsPause');
+    const pauseRestartBtn = document.getElementById('pauseRestartBtn');
+    const resumeBtn = document.getElementById('resumeBtn');
+
+    let ytPlayer = null;
+    function onYouTubeIframeAPIReady() {
+      ytPlayer = new YT.Player('youtubePlayer', {});
+    }
+    (function loadYT() {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    })();
+
+    musicBtn.onclick = () => {
+      musicEnabled = !musicEnabled;
+      if (musicEnabled) {
+        musicBtn.textContent = '🔇 關音樂';
+        musicBtn.classList.add('active');
+        if (isRunning && ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+      } else {
+        musicBtn.textContent = '🎵 音樂';
+        musicBtn.classList.remove('active');
+        if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+      }
+    };
+
+    cadenceSlider.oninput = () => {
+      cadenceValue.textContent = cadenceSlider.value;
+      const cadence = parseInt(cadenceSlider.value, 10);
+      stepInterval = 60000 / cadence;
+    };
+
+    intervalSlider.oninput = () => {
+      intervalValue.textContent = intervalSlider.value + '秒';
+    };
+
+    function playFootstep() {
+      footstepAudio.currentTime = 0;
+      footstepAudio.play().catch(()=>{});
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60).toString().padStart(2,'0');
+      const s = (seconds % 60).toString().padStart(2,'0');
+      return `${m}:${s}`;
+    }
+
+    function updateTimer() {
+      timerEl.textContent = formatTime(timer);
+    }
+
+    function updateStats() {
+      totalStepsEl.textContent = totalSteps;
+    }
+
+    function randInt(min,max){
+      return Math.floor(Math.random()*(max-min+1))+min;
+    }
+
+    function getDifficultyLevelByTime(sec) {
+      const minute = Math.floor(sec / 60);
+      if (minute <= 0) return 1;
+      if (minute === 1) return 2;
+      if (minute === 2) return 3;
+      if (minute === 3) return 4;
+      if (minute === 4) return 5;
+      if (minute === 5) return 6;
+      if (minute === 6) return 7;
+      if (minute === 7) return 8;
+      if (minute === 8) return 9;
+      if (minute === 9) return 10;
+      return 11;
+    }
+
+    function generateMathProblem() {
+      const level = getDifficultyLevelByTime(timer);
+      let a, b, c, op, expected;
+      const ops = ['+','-','×','÷'];
+
+      if (level === 1) {
+        a = randInt(1,9);
+        b = randInt(1,9);
+        op = '+';
+        expected = a + b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 2) {
+        a = randInt(1,9);
+        b = randInt(10,99);
+        op = '+';
+        expected = a + b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 3) {
+        a = randInt(10,99);
+        b = randInt(1,9);
+        op = '+';
+        expected = a + b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 4) {
+        a = randInt(1,9);
+        b = randInt(0,9);
+        if (b > a) [a,b] = [b,a];
+        op = '-';
+        expected = a - b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 5) {
+        a = randInt(1,9);
+        b = randInt(1,9);
+        op = '-';
+        expected = a - b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 6) {
+        a = randInt(10,99);
+        b = randInt(1,9);
+        op = '-';
+        expected = a - b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 7) {
+        a = randInt(1,9);
+        b = randInt(10,99);
+        op = '-';
+        expected = a - b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 8) {
+        a = randInt(1,9);
+        b = randInt(1,9);
+        op = '×';
+        expected = a * b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 9) {
+        a = randInt(10,99);
+        b = randInt(2,9);
+        op = '×';
+        expected = a * b;
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else if (level === 10) {
+        op = '×';
+        do {
+          a = randInt(1,9);
+          b = randInt(10,99);
+          expected = a * b;
+        } while (expected > 300);
+        currentProblem = { a, b, op, expected };
+        mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+      } else {
+        const mode = randInt(1,3);
+        if (mode === 1) {
+          b = randInt(2,9);
+          expected = randInt(1,9);
+          a = b * expected;
+          op = '÷';
+          currentProblem = { a, b, op, expected };
+          mathEl.innerHTML = `${a} ${op} ${b} = ?`;
+        } else if (mode === 2) {
+          a = randInt(1,9);
+          b = randInt(1,9);
+          c = randInt(1,9);
+          const op1 = ops[randInt(0,1)];
+          const op2 = ops[randInt(0,1)];
+          let exprText = `${a} ${op1} ${b} ${op2} ${c}`;
+          let val = (op1 === '+') ? a + b : a - b;
+          val = (op2 === '+') ? val + c : val - c;
+          currentProblem = { text: exprText, expected: val };
+          mathEl.innerHTML = `${exprText} = ?`;
+        } else {
+          a = randInt(1,9);
+          b = randInt(1,9);
+          c = randInt(1,9);
+          const op1 = '×';
+          const op2 = randInt(0,1) ? '+' : '-';
+          let exprText = `${a} ${op1} ${b} ${op2} ${c}`;
+          let val = a * b;
+          val = (op2 === '+') ? val + c : val - c;
+          currentProblem = { text: exprText, expected: val };
+          mathEl.innerHTML = `${exprText} = ?`;
+        }
+      }
+
+      msgEl.textContent = '';
+      fitTextToOneLine(mathEl, 56, 18);
+
+      const qSec = parseInt(intervalSlider.value, 10);
+      nextQuestionTime = timer + qSec;
+    }
+
+    function showAnswer() {
+      if (currentProblem.text !== undefined) {
+        mathEl.innerHTML =
+          `${currentProblem.text} = <span class="answer">${currentProblem.expected}</span>`;
+      } else {
+        mathEl.innerHTML =
+          `${currentProblem.a} ${currentProblem.op} ${currentProblem.b} = <span class="answer">${currentProblem.expected}</span>`;
+      }
+      fitTextToOneLine(mathEl, 56, 18);
+
+      showAnswerTimeout = setTimeout(() => {
+        generateMathProblem();
+      }, 1200);
+    }
+
+    function clearTimers() {
+      if (intervalId) {
+        cancelAnimationFrame(intervalId);
+        intervalId = null;
+      }
+      if (showAnswerTimeout) {
+        clearTimeout(showAnswerTimeout);
+        showAnswerTimeout = null;
+      }
+    }
+
+    function resetGameState() {
+      clearTimers();
+      timer = 0;
+      totalSteps = 0;
+      isRunning = false;
+      isPaused = false;
+      updateTimer();
+      updateStats();
+      mathEl.innerHTML = '準備開始…';
+      msgEl.textContent = ' ';
+      statsPanelStop.classList.remove('show');
+      statsPanelPause.classList.remove('show');
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      stopBtn.disabled = true;
+    }
+
+    function startLoop() {
+      lastLoopTime = performance.now();
+      lastStepTime = lastLoopTime;
+
+      const firstQSec = parseInt(intervalSlider.value, 10);
+      nextQuestionTime = timer + firstQSec;
+
+      const loop = (now) => {
+        if (!isRunning || isPaused) return;
+
+        const delta = now - lastLoopTime;
+        if (delta >= 1000) {
+          const addSec = Math.floor(delta / 1000);
+          timer += addSec;
+          lastLoopTime += addSec * 1000;
+          updateTimer();
+        }
+
+        if (now - lastStepTime >= stepInterval) {
+          playFootstep();
+          totalSteps++;
+          lastStepTime = now;
+          updateStats();
+        }
+
+        if (timer >= nextQuestionTime) {
+          showAnswer();
+        }
+
+        intervalId = requestAnimationFrame(loop);
+      };
+      intervalId = requestAnimationFrame(loop);
+    }
+
+    function startTimer() {
+      resetGameState();
+      isRunning = true;
+      startBtn.disabled = true;
+      pauseBtn.disabled = false;
+      stopBtn.disabled = false;
+
+      if (musicEnabled && ytPlayer && ytPlayer.playVideo) {
+        ytPlayer.seekTo(0, true);
+        ytPlayer.playVideo();
+      }
+
+      generateMathProblem();
+      startLoop();
+    }
+
+    function pauseGame() {
+      if (!isRunning || isPaused) return;
+      isPaused = true;
+      clearTimers();
+
+      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) {
+        ytPlayer.pauseVideo();
+      }
+
+      finalTimePauseEl.textContent = formatTime(timer);
+      finalStepsPauseEl.textContent = totalSteps;
+      statsPanelPause.classList.add('show');
+
+      pauseBtn.disabled = true;
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+    }
+
+    function resumeGame() {
+      if (!isRunning || !isPaused) return;
+      isPaused = false;
+      statsPanelPause.classList.remove('show');
+
+      if (musicEnabled && ytPlayer && ytPlayer.playVideo) {
+        ytPlayer.playVideo();
+      }
+
+      lastLoopTime = performance.now();
+      lastStepTime = lastLoopTime;
+      startLoop();
+
+      pauseBtn.disabled = false;
+      stopBtn.disabled = false;
+    }
+
+    function stopAll() {
+      clearTimers();
+      isRunning = false;
+      isPaused = false;
+
+      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) {
+        ytPlayer.pauseVideo();
+      }
+
+      finalTimeStopEl.textContent = formatTime(timer);
+      finalStepsStopEl.textContent = totalSteps;
+      statsPanelStop.classList.add('show');
+      statsPanelPause.classList.remove('show');
+
+      startBtn.disabled = true;
+      pauseBtn.disabled = true;
+      stopBtn.disabled = true;
+    }
+
+    startBtn.onclick = () => { if (!isRunning) startTimer(); };
+    pauseBtn.onclick = () => { pauseGame(); };
+    stopBtn.onclick = () => { if (isRunning || isPaused) stopAll(); };
+
+    restartBtn.onclick = () => {
+      statsPanelStop.classList.remove('show');
+      startTimer();
+    };
+
+    pauseRestartBtn.onclick = () => {
+      statsPanelPause.classList.remove('show');
+      startTimer();
+    };
+
+    resumeBtn.onclick = () => { resumeGame(); };
+  </script>
+</body>
+</html>
