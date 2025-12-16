@@ -6,21 +6,20 @@
   <title>叫色超慢跑體智活動 V1（16:9）</title>
   <style>
     :root {
-      --bg: #000000;
-      --card: #1e1e1e;
-      --accent: #4a90e2;
-      --accent-soft: #f5a623;
-      --text-main: #f5f5f5;
-      --text-sub: #cccccc;
-      --text-light: rgba(204, 204, 204, 0.4);
-      --answer: #ffd54f;
+      --bg: #f5f5f0;           /* 淺米白 */
+      --card: #ffffff;
+      --accent: #6c7a89;       /* 低飽和灰藍 */
+      --accent-soft: #b0b8c2;
+      --text-main: #333333;
+      --text-sub: #777777;
+      --border-soft: #e0e0dd;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Microsoft JhengHei", system-ui, sans-serif;
       background: var(--bg);
       color: var(--text-main);
       min-height: 100vh;
@@ -30,23 +29,22 @@
       padding: 0;
     }
 
-    /* 16:9 螢幕框 */
+    /* 16:9 外框，簡潔白底+淡陰影 */
     .screen-wrapper {
       width: 90vw;
       max-width: 1280px;
       aspect-ratio: 16 / 9;
-      background: #111;
-      border-radius: 18px;
-      box-shadow: 0 0 40px rgba(0,0,0,0.8);
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.08);
       overflow: hidden;
       display: flex;
+      border: 1px solid var(--border-soft);
     }
 
     .container {
       width: 100%;
       height: 100%;
-      background: var(--card);
-      border-radius: 18px;
       padding: 16px 24px;
       display: flex;
       flex-direction: column;
@@ -55,10 +53,11 @@
 
     .title {
       text-align: center;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--accent-soft);
-      margin-bottom: 6px;
+      font-size: 1.2rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      margin-bottom: 8px;
       white-space: nowrap;
     }
 
@@ -67,41 +66,53 @@
       justify-content: space-around;
       align-items: center;
       padding: 10px 0 10px;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid var(--border-soft);
       margin-bottom: 8px;
     }
 
     .control-group {
       text-align: center;
-      min-width: 140px;
+      min-width: 160px;
     }
 
     .control-label {
       font-size: 0.85rem;
       color: var(--text-sub);
-      margin-bottom: 2px;
+      margin-bottom: 4px;
+      letter-spacing: 0.08em;
     }
 
     .control-value {
       font-size: 1.1rem;
-      color: var(--accent-soft);
-      font-weight: 600;
-      margin-bottom: 2px;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 4px;
     }
 
     input[type="range"] {
-      width: 120px;
-      height: 6px;
-      accent-color: var(--accent);
-      border-radius: 3px;
+      width: 140px;
+      height: 4px;
+      background: #ddd;
+      border-radius: 999px;
+      appearance: none;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
     }
 
     .range-labels {
       display: flex;
       justify-content: space-between;
-      font-size: 0.65rem;
-      color: var(--text-light);
-      margin-top: 0;
+      font-size: 0.7rem;
+      color: var(--text-sub);
+      margin-top: 2px;
     }
 
     .buttons {
@@ -113,42 +124,41 @@
     }
 
     button {
-      border: none;
-      border-radius: 22px;
-      padding: 8px 14px;
+      border: 1px solid var(--border-soft);
+      border-radius: 999px;
+      padding: 8px 16px;
       font-size: 0.9rem;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
       flex: 1;
-      max-width: 110px;
+      max-width: 120px;
       white-space: nowrap;
-    }
-
-    #startBtn {
-      background: linear-gradient(135deg, var(--accent), #357abd);
-      color: white;
-      box-shadow: 0 4px 12px rgba(74,144,226,0.4);
-    }
-
-    #pauseBtn, #stopBtn, #musicBtn {
-      background: #444;
+      background: #f9f9f5;
       color: var(--text-main);
     }
 
+    #startBtn {
+      background: #ffffff;
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
     #musicBtn.active {
-      background: linear-gradient(135deg, #4CAF50, #45a049);
-      box-shadow: 0 4px 12px rgba(76,175,80,0.4);
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
     }
 
     button:disabled {
-      opacity: 0.4;
+      opacity: 0.45;
       cursor: default;
     }
 
     button:not(:disabled):hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+      background: #f0f0ea;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
     }
 
     .math-container {
@@ -161,27 +171,29 @@
     }
 
     .math-panel {
-      background: rgba(0,0,0,0.2);
       border-radius: 14px;
       padding: 20px 16px;
       width: 100%;
-      max-width: 440px;
+      max-width: 680px;
       text-align: center;
     }
 
+    /* 題目字體超大，投影用 */
     #math {
-      font-weight: 800;
+      font-weight: 700;
       line-height: 1.05;
       white-space: nowrap;
       overflow: hidden;
       max-width: 100%;
       margin-bottom: 8px;
+      font-size: 110px; /* 基本就很大，後面 JS 只會往下調整 */
     }
 
     #message {
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: var(--text-sub);
       min-height: 1.2em;
+      visibility: hidden;   /* 不顯示提示文字 */
     }
 
     .stats-panel {
@@ -190,9 +202,7 @@
       margin: auto;
       width: 80%;
       max-width: 380px;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(10px);
-      border: 2px solid var(--accent);
+      background: rgba(255,255,255,0.96);
       border-radius: 16px;
       padding: 18px 16px;
       text-align: center;
@@ -202,6 +212,8 @@
       flex-direction: column;
       justify-content: center;
       gap: 8px;
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
     }
 
     .stats-panel.show {
@@ -210,21 +222,22 @@
 
     .stats-title {
       margin: 0;
-      color: var(--accent-soft);
-      font-size: 1.2rem;
-      font-weight: 600;
+      color: var(--accent);
+      font-size: 1.1rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
     }
 
     .stat-line {
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: var(--text-main);
       line-height: 1.4;
       margin: 4px 0;
     }
 
     .stat-value {
-      color: var(--accent-soft);
-      font-weight: 700;
+      color: var(--accent);
+      font-weight: 600;
       font-size: 1.3rem;
     }
 
@@ -242,17 +255,19 @@
     }
 
     #restartBtn, #pauseRestartBtn {
-      background: linear-gradient(135deg, var(--accent-soft), #d98c1a);
-      color: white;
+      background: #ffffff;
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
     #resumeBtn {
-      background: linear-gradient(135deg, var(--accent), #357abd);
-      color: white;
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
     }
 
     .bottom-wrapper {
-      border-top: 1px solid #333;
+      border-top: 1px solid var(--border-soft);
       padding-top: 6px;
       margin-top: 4px;
       display: flex;
@@ -269,13 +284,14 @@
 
     .timer-small {
       color: var(--accent);
-      font-weight: 600;
+      font-weight: 500;
       font-size: 1.1rem;
+      letter-spacing: 0.08em;
     }
 
     .steps-text {
       font-size: 0.85rem;
-      color: var(--accent-soft);
+      color: var(--text-sub);
     }
 
     .footer {
@@ -283,19 +299,9 @@
       flex-direction: column;
       align-items: flex-end;
       font-size: 0.75rem;
-      color: var(--accent-soft);
+      color: var(--text-sub);
       line-height: 1.3;
       white-space: nowrap;
-    }
-
-    .answer { 
-      color: var(--answer) !important; 
-      animation: glow 1.5s ease-in-out infinite alternate; 
-    }
-    
-    @keyframes glow {
-      from { text-shadow: 0 0 10px var(--answer); }
-      to { text-shadow: 0 0 20px var(--answer), 0 0 30px var(--answer); }
     }
 
     @media (max-width: 768px) {
@@ -303,11 +309,10 @@
       .control-group { min-width: 220px; }
       input[type="range"] { width: 180px; }
       .math-panel { padding: 16px 10px; }
-      #math { font-size: 2.2rem; }
+      #math { font-size: 72px; }
       .stats-panel { width: 90%; }
     }
 
-    /* YouTube iframe 保留，但不再使用 JS 控制 */
     #youtubePlayer {
       position: absolute;
       top: -9999px;
@@ -322,9 +327,9 @@
 <body>
   <div class="screen-wrapper">
     <div class="container">
-      <!-- 如果日後要再用 YouTube，可以保留這個 iframe -->
+      <!-- 指定的 YouTube 音樂（跑步 150 BPM） -->
       <iframe id="youtubePlayer"
-        src="https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
+        src="https://www.youtube.com/embed/Bx2TG99pNVo?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
         frameborder="0"
         allow="autoplay; encrypted-media"
         allowfullscreen>
@@ -365,21 +370,21 @@
         </div>
 
         <div id="statsPanelStop" class="stats-panel">
-          <h3 class="stats-title">🎉 練習結束</h3>
+          <h3 class="stats-title">練習結束</h3>
           <div class="stat-line">總時間：<span class="stat-value" id="finalTimeStop">--</span></div>
           <div class="stat-line">總步數：<span class="stat-value" id="finalStepsStop">--</span></div>
           <div class="stats-buttons">
-            <button id="restartBtn" class="stats-btn">🔄 重新開始</button>
+            <button id="restartBtn" class="stats-btn">重新開始</button>
           </div>
         </div>
 
         <div id="statsPanelPause" class="stats-panel">
-          <h3 class="stats-title">⏸️ 已暫停</h3>
+          <h3 class="stats-title">暫停中</h3>
           <div class="stat-line">目前時間：<span class="stat-value" id="finalTimePause">--</span></div>
           <div class="stat-line">目前步數：<span class="stat-value" id="finalStepsPause">--</span></div>
           <div class="stats-buttons">
-            <button id="pauseRestartBtn" class="stats-btn">🔄 重新開始</button>
-            <button id="resumeBtn" class="stats-btn">▶️ 繼續</button>
+            <button id="pauseRestartBtn" class="stats-btn">重新開始</button>
+            <button id="resumeBtn" class="stats-btn">繼續</button>
           </div>
         </div>
       </div>
@@ -402,7 +407,7 @@
   </audio>
 
   <script>
-    function fitTextToOneLine(element, maxFontSize = 56, minFontSize = 18) {
+    function fitTextToOneLine(element, maxFontSize = 120, minFontSize = 60) {
       element.style.fontSize = maxFontSize + "px";
       if (!element.offsetWidth) return;
       const containerWidth = element.parentElement.clientWidth;
@@ -435,32 +440,29 @@
       return arr[randInt(0, arr.length - 1)];
     }
 
-    // 產生單一題目：isNormal = true → 正常題；false → 叫色題
     function makeQuestion(isNormal) {
       if (isNormal) {
         const word = randomPick(COLOR_WORDS);
-        const color = word;  // 一致
+        const color = word;
         return { text: word, color, type: "normal" };
       } else {
         let word, color;
         do {
           word = randomPick(COLOR_WORDS);
           color = randomPick(COLOR_WORDS);
-        } while (word === color); // 確保不一致
+        } while (word === color);
         return { text: word, color, type: "stroop" };
       }
     }
 
-    // 按 1:3 比例產生題目列表
     function buildQuestionList(total = 40) {
       const list = [];
       while (list.length < total) {
         const group = [];
-        group.push(makeQuestion(true));     // 1 題正常
-        for (let i = 0; i < 3; i++) {       // 3 題叫色
+        group.push(makeQuestion(true));
+        for (let i = 0; i < 3; i++) {
           group.push(makeQuestion(false));
         }
-        // 洗牌
         for (let i = group.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [group[i], group[j]] = [group[j], group[i]];
@@ -482,15 +484,14 @@
       const q = questions[currentIndex];
       mathEl.textContent = q.text;
       mathEl.style.color = COLOR_VALUES[q.color];
-      msgEl.textContent = (q.type === "normal") ? "正常題：字義與顏色相同" : "叫色題：只看顏色，不看字義";
-      fitTextToOneLine(mathEl, 56, 24);
+      // 不顯示任何提示，只單純呈現顏色字
+      fitTextToOneLine(mathEl, 120, 60);
     }
 
     // ===== 計時與步頻邏輯 =====
     let timer = 0;
     let totalSteps = 0;
     let intervalId = null;
-    let showAnswerTimeout = null;
     let isRunning = false;
     let isPaused = false;
     let musicEnabled = false;
@@ -525,6 +526,19 @@
     const pauseRestartBtn = document.getElementById('pauseRestartBtn');
     const resumeBtn = document.getElementById('resumeBtn');
 
+    let ytPlayer = null;
+
+    function onYouTubeIframeAPIReady() {
+      ytPlayer = new YT.Player('youtubePlayer', {});
+    }
+
+    (function loadYT() {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    })();
+
     function playFootstep() {
       footstepAudio.currentTime = 0;
       footstepAudio.play().catch(()=>{});
@@ -548,10 +562,6 @@
       if (intervalId) {
         cancelAnimationFrame(intervalId);
         intervalId = null;
-      }
-      if (showAnswerTimeout) {
-        clearTimeout(showAnswerTimeout);
-        showAnswerTimeout = null;
       }
     }
 
@@ -635,6 +645,10 @@
       pauseBtn.disabled = true;
       startBtn.disabled = true;
       stopBtn.disabled = false;
+
+      if (ytPlayer && ytPlayer.pauseVideo && musicEnabled) {
+        ytPlayer.pauseVideo();
+      }
     }
 
     function resumeGame() {
@@ -648,6 +662,10 @@
 
       pauseBtn.disabled = false;
       stopBtn.disabled = false;
+
+      if (ytPlayer && ytPlayer.playVideo && musicEnabled) {
+        ytPlayer.playVideo();
+      }
     }
 
     function stopAll() {
@@ -663,17 +681,27 @@
       startBtn.disabled = true;
       pauseBtn.disabled = true;
       stopBtn.disabled = true;
+
+      if (ytPlayer && ytPlayer.pauseVideo && musicEnabled) {
+        ytPlayer.pauseVideo();
+      }
     }
 
-    // 音樂按鈕只切換顯示狀態，不控制 YouTube
+    // 音樂按鈕：切換狀態 + 控制 YouTube
     musicBtn.onclick = () => {
       musicEnabled = !musicEnabled;
       if (musicEnabled) {
         musicBtn.textContent = '🔇 關音樂';
         musicBtn.classList.add('active');
+        if (ytPlayer && ytPlayer.playVideo) {
+          ytPlayer.playVideo();
+        }
       } else {
         musicBtn.textContent = '🎵 音樂';
         musicBtn.classList.remove('active');
+        if (ytPlayer && ytPlayer.pauseVideo) {
+          ytPlayer.pauseVideo();
+        }
       }
     };
 
