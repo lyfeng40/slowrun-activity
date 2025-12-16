@@ -307,6 +307,7 @@
       .stats-panel { width: 90%; }
     }
 
+    /* YouTube iframe 保留，但不再使用 JS 控制 */
     #youtubePlayer {
       position: absolute;
       top: -9999px;
@@ -321,6 +322,7 @@
 <body>
   <div class="screen-wrapper">
     <div class="container">
+      <!-- 如果日後要再用 YouTube，可以保留這個 iframe -->
       <iframe id="youtubePlayer"
         src="https://www.youtube.com/embed/YUC-NhYa_jM?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1"
         frameborder="0"
@@ -484,7 +486,7 @@
       fitTextToOneLine(mathEl, 56, 24);
     }
 
-    // ===== 原本計時與步頻邏輯 =====
+    // ===== 計時與步頻邏輯 =====
     let timer = 0;
     let totalSteps = 0;
     let intervalId = null;
@@ -522,40 +524,6 @@
     const finalStepsPauseEl = document.getElementById('finalStepsPause');
     const pauseRestartBtn = document.getElementById('pauseRestartBtn');
     const resumeBtn = document.getElementById('resumeBtn');
-
-    let ytPlayer = null;
-    function onYouTubeIframeAPIReady() {
-      ytPlayer = new YT.Player('youtubePlayer', {});
-    }
-    (function loadYT() {
-      const tag = document.createElement('script');
-      tag.src = "https://www.youtube.com/iframe_api";
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    })();
-
-    musicBtn.onclick = () => {
-      musicEnabled = !musicEnabled;
-      if (musicEnabled) {
-        musicBtn.textContent = '🔇 關音樂';
-        musicBtn.classList.add('active');
-        if (isRunning && ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
-      } else {
-        musicBtn.textContent = '🎵 音樂';
-        musicBtn.classList.remove('active');
-        if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
-      }
-    };
-
-    cadenceSlider.oninput = () => {
-      cadenceValue.textContent = cadenceSlider.value;
-      const cadence = parseInt(cadenceSlider.value, 10);
-      stepInterval = 60000 / cadence;
-    };
-
-    intervalSlider.oninput = () => {
-      intervalValue.textContent = intervalSlider.value + '秒';
-    };
 
     function playFootstep() {
       footstepAudio.currentTime = 0;
@@ -649,11 +617,6 @@
       pauseBtn.disabled = false;
       stopBtn.disabled = false;
 
-      if (musicEnabled && ytPlayer && ytPlayer.playVideo) {
-        ytPlayer.seekTo(0, true);
-        ytPlayer.playVideo();
-      }
-
       showQuestion();
       const qSec = parseInt(intervalSlider.value, 10);
       nextQuestionTime = timer + qSec;
@@ -664,10 +627,6 @@
       if (!isRunning || isPaused) return;
       isPaused = true;
       clearTimers();
-
-      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) {
-        ytPlayer.pauseVideo();
-      }
 
       finalTimePauseEl.textContent = formatTime(timer);
       finalStepsPauseEl.textContent = totalSteps;
@@ -683,10 +642,6 @@
       isPaused = false;
       statsPanelPause.classList.remove('show');
 
-      if (musicEnabled && ytPlayer && ytPlayer.playVideo) {
-        ytPlayer.playVideo();
-      }
-
       lastLoopTime = performance.now();
       lastStepTime = lastLoopTime;
       startLoop();
@@ -700,10 +655,6 @@
       isRunning = false;
       isPaused = false;
 
-      if (musicEnabled && ytPlayer && ytPlayer.pauseVideo) {
-        ytPlayer.pauseVideo();
-      }
-
       finalTimeStopEl.textContent = formatTime(timer);
       finalStepsStopEl.textContent = totalSteps;
       statsPanelStop.classList.add('show');
@@ -713,6 +664,28 @@
       pauseBtn.disabled = true;
       stopBtn.disabled = true;
     }
+
+    // 音樂按鈕只切換顯示狀態，不控制 YouTube
+    musicBtn.onclick = () => {
+      musicEnabled = !musicEnabled;
+      if (musicEnabled) {
+        musicBtn.textContent = '🔇 關音樂';
+        musicBtn.classList.add('active');
+      } else {
+        musicBtn.textContent = '🎵 音樂';
+        musicBtn.classList.remove('active');
+      }
+    };
+
+    cadenceSlider.oninput = () => {
+      cadenceValue.textContent = cadenceSlider.value;
+      const cadence = parseInt(cadenceSlider.value, 10);
+      stepInterval = 60000 / cadence;
+    };
+
+    intervalSlider.oninput = () => {
+      intervalValue.textContent = intervalSlider.value + '秒';
+    };
 
     const finalTimeStopEl = document.getElementById('finalTimeStop');
     const finalStepsStopEl = document.getElementById('finalStepsStop');
