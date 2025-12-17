@@ -204,7 +204,19 @@
       overflow: hidden;
       max-width: 100%;
       margin: 0;
-      font-size: 300px; /* 最大 300px，會用 JS 依容器寬度往下調 */
+      font-size: 300px;
+    }
+
+    .char-left,
+    .char-right {
+      display: inline-block;
+      font-size: inherit;
+      line-height: 1.0;
+    }
+
+    .char-gap {
+      display: inline-block;
+      width: 0.6em; /* 左右字距 */
     }
 
     .stats-panel {
@@ -315,7 +327,7 @@
       white-space: nowrap;
     }
 
-    /* 規則切換提示 overlay */
+    /* 規則切換提示 overlay：黑底 50%，白底黑框文字 */
     .rule-overlay {
       position: absolute;
       inset: 0;
@@ -338,9 +350,10 @@
       font-size: 200px;
       font-weight: 700;
       color: #000000;
-      background: rgba(255,255,255,0.0);
-      padding: 8px 16px;
-      border-radius: 8px;
+      background: #ffffff;
+      padding: 16px 32px;
+      border-radius: 12px;
+      border: 4px solid #000000;
       white-space: nowrap;
     }
 
@@ -403,7 +416,7 @@
           <div class="radio-options">
             <label><input type="radio" name="level" value="1" checked> I</label>
             <label><input type="radio" name="level" value="2"> II</label>
-            <label><input type="radio" name="level" value="3" disabled> III</label>
+            <label><input type="radio" name="level" value="3"> III</label>
           </div>
         </div>
 
@@ -436,7 +449,12 @@
 
       <div class="math-container">
         <div class="math-panel">
-          <div id="math">準備</div>
+          <!-- 左右兩個 span，預設顯示左邊「準備」 -->
+          <div id="math">
+            <span id="charLeft" class="char-left">準備</span>
+            <span class="char-gap"></span>
+            <span id="charRight" class="char-right"></span>
+          </div>
         </div>
 
         <div id="statsPanelStop" class="stats-panel">
@@ -477,14 +495,27 @@
   </audio>
 
   <script>
-    function fitTextToOneChar(element, maxFontSize = 300, minFontSize = 80) {
-      element.style.fontSize = maxFontSize + "px";
-      if (!element.offsetWidth) return;
-      const containerWidth = element.parentElement.clientWidth;
+    function fitForSingle(mathEl, maxFontSize = 300, minFontSize = 80) {
+      // 單字時，直接以整個 math 容器寬度來縮放
+      mathEl.style.fontSize = maxFontSize + "px";
+      if (!mathEl.offsetWidth) return;
+      const containerWidth = mathEl.parentElement.clientWidth;
       let currentSize = maxFontSize;
-      while (element.scrollWidth > containerWidth && currentSize > minFontSize) {
+      while (mathEl.scrollWidth > containerWidth && currentSize > minFontSize) {
         currentSize -= 4;
-        element.style.fontSize = currentSize + "px";
+        mathEl.style.fontSize = currentSize + "px";
+      }
+    }
+
+    function fitForDual(mathEl, maxFontSize = 300, minFontSize = 80) {
+      // 左右兩字都用同一個 font-size，調整到不超出容器寬度
+      mathEl.style.fontSize = maxFontSize + "px";
+      if (!mathEl.offsetWidth) return;
+      const containerWidth = mathEl.parentElement.clientWidth;
+      let currentSize = maxFontSize;
+      while (mathEl.scrollWidth > containerWidth && currentSize > minFontSize) {
+        currentSize -= 4;
+        mathEl.style.fontSize = currentSize + "px";
       }
     }
 
@@ -509,7 +540,7 @@
       return arr[randInt(0, arr.length - 1)];
     }
 
-    // 產生單一字題（只顯示 char，一樣用 stroop 概念）
+    // 單一字題（Level I / II 用）
     function makeSingleQuestion(isNormal) {
       if (isNormal) {
         const base = randomPick(COLOR_BASE);
@@ -532,19 +563,53 @@
       }
     }
 
+    // Level III 雙字題：左右各一個 mini Stroop 題
+    function makeDualQuestion() {
+      function oneSide(isNormal) {
+        if (isNormal) {
+          const base = randomPick(COLOR_BASE);
+          return { char: base.char, inkColor: base.color, type: "normal" };
+        } else {
+          let wordBase, colorBase;
+          do {
+            wordBase = randomPick(COLOR_BASE);
+            colorBase = randomPick(COLOR_BASE);
+          } while (wordBase.word === colorBase.word);
+          return { char: wordBase.char, inkColor: colorBase.color, type: "stroop" };
+        }
+      }
+
+      // 讓每題至少有一側是 stroop
+      const patterns = [
+        { left: "normal", right: "stroop" },
+        { left: "stroop", right: "normal" },
+        { left: "stroop", right: "stroop" }
+      ];
+      const pat = randomPick(patterns);
+      return {
+        left: oneSide(pat.left === "normal"),
+        right: oneSide(pat.right === "normal")
+      };
+    }
+
     // 依 Level 建立題目列表
     function buildQuestionList(total, level) {
       const list = [];
       while (list.length < total) {
         const group = [];
         if (level === 1) {
-          // Level I：1 normal + 3 stroop（1:3）
+          // Level I：單字題 1 normal + 3 stroop（1:3）
           group.push(makeSingleQuestion(true));
           for (let i = 0; i < 3; i++) group.push(makeSingleQuestion(false));
-        } else {
-          // Level II / III：1 normal + 5 stroop（1:5）
+        } else if (level === 2) {
+          // Level II：單字題 1 normal + 5 stroop（1:5）
           group.push(makeSingleQuestion(true));
           for (let i = 0; i < 5; i++) group.push(makeSingleQuestion(false));
+        } else {
+          // Level III：雙字題，每題一個 dual question
+          for (let i = 0; i < 6; i++) {
+            group.push(makeDualQuestion());
+          }
         }
         // 洗牌 group
         for (let i = group.length - 1; i > 0; i--) {
@@ -566,9 +631,22 @@
         currentIndex = 0;
       }
       const q = questions[currentIndex];
-      mathEl.textContent = q.char;
-      mathEl.style.color = q.inkColor;
-      fitTextToOneChar(mathEl, 300, 80);
+
+      if (currentLevel === 3) {
+        // Level III：左右雙字
+        charLeftEl.textContent = q.left.char;
+        charLeftEl.style.color = q.left.inkColor;
+        charRightEl.textContent = q.right.char;
+        charRightEl.style.color = q.right.inkColor;
+        fitForDual(mathEl, 300, 80);
+      } else {
+        // Level I / II：單字，只用左側顯示
+        charLeftEl.textContent = q.char;
+        charLeftEl.style.color = q.inkColor;
+        charRightEl.textContent = "";
+        charRightEl.style.color = "#000000";
+        fitForSingle(mathEl, 300, 80);
+      }
     }
 
     // 狀態變數
@@ -584,7 +662,7 @@
     let stepInterval = 60000 / 180;
     let nextQuestionTime = 0;
 
-    let currentLevel = 1;           // 1,2 (3 UI存在，尚未實作)
+    let currentLevel = 1;           // 1,2,3
     let currentRule = "NAME_COLOR";// 叫色 / 叫字
     let totalQuestions = 300;
 
@@ -601,6 +679,8 @@
     const musicBtn = document.getElementById('musicBtn');
     const timerEl = document.getElementById('timer');
     const mathEl = document.getElementById('math');
+    const charLeftEl = document.getElementById('charLeft');
+    const charRightEl = document.getElementById('charRight');
     const totalStepsEl = document.getElementById('totalSteps');
     const footstepAudio = document.getElementById('footstep');
 
@@ -665,8 +745,9 @@
       isPaused = false;
       updateTimer();
       updateStats();
-      mathEl.textContent = "準備";
-      mathEl.style.color = "#000000";
+      charLeftEl.textContent = "準備";
+      charLeftEl.style.color = "#000000";
+      charRightEl.textContent = "";
       statsPanelStop.classList.remove('show');
       statsPanelPause.classList.remove('show');
       startBtn.disabled = false;
@@ -822,7 +903,7 @@
       intervalValue.textContent = intervalSlider.value + '秒';
     };
 
-    // Level 選擇（Level III 介面存在，但目前邏輯視同 Level II）
+    // Level 選擇（1/2/3）
     levelRadios.forEach(r => {
       r.addEventListener('change', () => {
         currentLevel = parseInt(r.value, 10);
@@ -861,7 +942,7 @@
     updateTimer();
     updateStats();
     questions = buildQuestionList(totalQuestions, currentLevel);
-    fitTextToOneChar(mathEl, 300, 80);
+    fitForSingle(mathEl, 300, 80);
   </script>
 </body>
 </html>
