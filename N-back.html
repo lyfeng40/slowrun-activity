@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>動物記憶超慢跑 V3.3 (穩定修復版)</title>
+  <title>動物記憶超慢跑 V3.4 (終極修復版)</title>
   <style>
     :root {
       --bg: #121212;
@@ -49,7 +49,7 @@
       display: flex;
       flex-direction: column;
       position: relative;
-      z-index: 10; /* 確保內容在最上層 */
+      z-index: 10;
     }
 
     .title {
@@ -160,7 +160,7 @@
       white-space: nowrap;
       background: #2a2a2a;
       color: var(--text-main);
-      z-index: 20; /* 確保按鈕可點擊 */
+      z-index: 20;
     }
 
     #startBtn {
@@ -187,7 +187,6 @@
       transform: translateY(-1px);
     }
 
-    /* 顯示區 */
     .display-area {
       flex: 1;
       display: flex;
@@ -262,7 +261,6 @@
       to { opacity: 1; }
     }
 
-    /* 統計面板 */
     .stats-panel {
       position: absolute;
       inset: 0;
@@ -372,7 +370,7 @@
       box-shadow: 0 0 20px var(--accent);
     }
 
-    /* 隱藏 YouTube Player 但保留 DOM 存在 */
+    /* 隱藏 YouTube Player */
     #player-wrapper {
       position: absolute;
       width: 1px;
@@ -382,6 +380,7 @@
       top: 0;
       left: 0;
       z-index: -1;
+      pointer-events: none;
     }
 
     @media (max-width: 900px) {
@@ -401,7 +400,7 @@
   <div class="screen-wrapper">
     <div class="container">
       
-      <!-- YouTube 容器 (修正為不影響點擊) -->
+      <!-- YouTube 容器 -->
       <div id="player-wrapper">
           <div id="youtubePlayer"></div>
       </div>
@@ -411,7 +410,7 @@
         <div id="ruleOverlayText" class="rule-overlay-text">反應訓練</div>
       </div>
 
-      <div class="title">動物記憶超慢跑 V3.3 (穩定版)</div>
+      <div class="title">動物記憶超慢跑 V3.4 (終極修復版)</div>
 
       <!-- 控制項 -->
       <div class="controls-row">
@@ -443,7 +442,7 @@
           </div>
         </div>
 
-        <!-- 4. 秒數 (通用) -->
+        <!-- 4. 秒數 -->
         <div class="control-group" id="intervalGroup">
           <div class="control-label" id="intervalLabel">每題/作答秒數</div>
           <div class="control-value" id="intervalValue">4秒</div>
@@ -455,10 +454,10 @@
         <button id="startBtn">▶️ 開始</button>
         <button id="pauseBtn" disabled>⏸️ 暫停</button>
         <button id="stopBtn" disabled>⏹️ 停止</button>
-        <button id="musicBtn">🎵 音樂 (載入中)</button>
+        <button id="musicBtn">🎵 音樂</button>
       </div>
 
-      <!-- 主要顯示區 -->
+      <!-- 顯示區 -->
       <div class="display-area">
         <div id="animalContainer" class="animal-container">
           <div class="recall-prompt">準備</div>
@@ -503,7 +502,7 @@
   </audio>
 
   <script>
-    // --- 1. 資料與變數 ---
+    /* 動物資料 */
     const ANIMALS = [
       "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", 
       "🦁", "🐮", "🐷", "🐸", "🐵", "🐔", "🐧", "🐦", "🐤", "🦆", 
@@ -516,6 +515,7 @@
       return shuffled.slice(0, count);
     }
 
+    /* 核心變數 */
     let timer = 0;
     let totalSteps = 0;
     let intervalId = null;
@@ -533,5 +533,408 @@
     let currentRule = "REACTION"; 
     let memoryTimeouts = []; 
 
-    // DOM 元素 (確保在 JS 最上方抓取)
-    const cadenceSlider = document.getElementById('cadence
+    /* DOM 元素抓取 */
+    const cadenceSlider = document.getElementById('cadence');
+    const intervalSlider = document.getElementById('interval');
+    const cadenceValue = document.getElementById('cadenceValue');
+    const intervalValue = document.getElementById('intervalValue');
+    
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const musicBtn = document.getElementById('musicBtn');
+    
+    const timerEl = document.getElementById('timer');
+    const totalStepsEl = document.getElementById('totalSteps');
+    const animalContainer = document.getElementById('animalContainer');
+    const footstepAudio = document.getElementById('footstep');
+    
+    const levelRadios = document.querySelectorAll('input[name="level"]');
+    const ruleRadios = document.querySelectorAll('input[name="rule"]');
+    const ruleOverlay = document.getElementById('ruleOverlay');
+    const ruleOverlayText = document.getElementById('ruleOverlayText');
+
+    const statsPanelStop = document.getElementById('statsPanelStop');
+    const finalTimeStopEl = document.getElementById('finalTimeStop');
+    const finalStepsStopEl = document.getElementById('finalStepsStop');
+    const restartBtn = document.getElementById('restartBtn');
+
+    const statsPanelPause = document.getElementById('statsPanelPause');
+    const finalTimePauseEl = document.getElementById('finalTimePause');
+    const finalStepsPauseEl = document.getElementById('finalStepsPause');
+    const pauseRestartBtn = document.getElementById('pauseRestartBtn');
+    const resumeBtn = document.getElementById('resumeBtn');
+
+    /* 事件綁定 */
+    
+    // 步頻
+    cadenceSlider.addEventListener('input', () => {
+      cadenceValue.textContent = cadenceSlider.value;
+      stepInterval = 60000 / parseInt(cadenceSlider.value, 10);
+    });
+
+    // 秒數
+    intervalSlider.addEventListener('input', () => {
+      intervalValue.textContent = intervalSlider.value + '秒';
+    });
+
+    // 數量
+    levelRadios.forEach(r => {
+      r.addEventListener('change', () => {
+        currentLevel = parseInt(r.value, 10);
+        if (!isRunning) animalContainer.innerHTML = '<div class="recall-prompt">準備</div>';
+      });
+    });
+
+    // 模式
+    ruleRadios.forEach(r => {
+      r.addEventListener('change', () => {
+        currentRule = r.value;
+        if (currentRule === "REACTION") {
+          showRuleOverlay("反應訓練");
+        } else {
+          showRuleOverlay("記憶訓練");
+        }
+        if(!isRunning) animalContainer.innerHTML = '<div class="recall-prompt">準備</div>';
+      });
+    });
+
+    // 核心按鈕
+    startBtn.addEventListener('click', () => { if (!isRunning) startTimer(); });
+    pauseBtn.addEventListener('click', () => { pauseGame(); });
+    stopBtn.addEventListener('click', () => { if (isRunning || isPaused) stopAll(); });
+    restartBtn.addEventListener('click', () => { statsPanelStop.classList.remove('show'); startTimer(); });
+    pauseRestartBtn.addEventListener('click', () => { statsPanelPause.classList.remove('show'); startTimer(); });
+    resumeBtn.addEventListener('click', () => { resumeGame(); });
+
+    // 音樂按鈕
+    musicBtn.addEventListener('click', () => {
+      musicEnabled = !musicEnabled;
+      if (musicEnabled) {
+        musicBtn.textContent = '🔇 關音樂';
+        musicBtn.classList.add('active');
+        if (playerReady && ytPlayer && ytPlayer.playVideo) {
+          // 只有在遊戲進行中才真的開始播，避免干擾
+          if (isRunning || (isPaused === false && timer > 0)) {
+            ytPlayer.playVideo();
+          }
+        }
+      } else {
+        musicBtn.textContent = '🎵 音樂';
+        musicBtn.classList.remove('active');
+        if (playerReady && ytPlayer && ytPlayer.pauseVideo) {
+          ytPlayer.pauseVideo();
+        }
+      }
+    });
+
+    /* YouTube API 初始化 */
+    let ytPlayer = null;
+    try {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    } catch(e) { console.error("YT API Load Error", e); }
+
+    window.onYouTubeIframeAPIReady = function() {
+      try {
+        ytPlayer = new YT.Player('youtubePlayer', {
+          height: '1',
+          width: '1',
+          videoId: '2xGULVj3gCA', 
+          playerVars: {
+            'playsinline': 1,
+            'controls': 0,
+            'disablekb': 1,
+            'loop': 1,
+            'playlist': '2xGULVj3gCA' 
+          },
+          events: {
+            'onReady': onPlayerReady
+          }
+        });
+      } catch(e) { console.error("Player Init Error", e); }
+    };
+
+    function onPlayerReady(event) {
+      playerReady = true;
+      // Pre-warm: 靜音播放一秒後暫停
+      try {
+        event.target.mute();
+        event.target.playVideo();
+        setTimeout(() => {
+          event.target.pauseVideo();
+          event.target.unMute();
+        }, 1000);
+      } catch(e){}
+    }
+
+
+    /* 遊戲邏輯 */
+
+    function playFootstep() {
+      footstepAudio.currentTime = 0;
+      footstepAudio.play().catch(()=>{});
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60).toString().padStart(2,'0');
+      const s = (seconds % 60).toString().padStart(2,'0');
+      return `${m}:${s}`;
+    }
+
+    function updateTimer() { timerEl.textContent = formatTime(timer); }
+    function updateStats() { totalStepsEl.textContent = totalSteps; }
+
+    function clearTimers() {
+      if (intervalId) { cancelAnimationFrame(intervalId); intervalId = null; }
+      memoryTimeouts.forEach(id => clearTimeout(id));
+      memoryTimeouts = [];
+    }
+
+    function getFontSizeForLevel(count) {
+      if (count <= 2) return "250px";
+      if (count === 3) return "200px";
+      if (count === 4) return "160px";
+      if (count === 5) return "130px";
+      if (count === 6) return "110px";
+      return "100px";
+    }
+
+    function getCurrentSettingTime() {
+      return parseInt(intervalSlider.value, 10) || 4;
+    }
+
+    function renderReactionMode() {
+      const animals = getRandomAnimals(currentLevel);
+      animalContainer.innerHTML = '';
+      const fSize = getFontSizeForLevel(currentLevel);
+      animals.forEach(animal => {
+        const el = document.createElement('div');
+        el.className = 'animal-card';
+        el.textContent = animal;
+        el.style.fontSize = fSize;
+        animalContainer.appendChild(el);
+      });
+    }
+
+    function runMemorySequence() {
+      const animals = getRandomAnimals(currentLevel);
+      const displayTimePerItem = 2000; 
+      const recallTime = getCurrentSettingTime() * 1000; 
+      
+      animalContainer.innerHTML = '';
+
+      // 1. 依序顯示
+      animals.forEach((animal, index) => {
+        const showId = setTimeout(() => {
+          animalContainer.innerHTML = ''; 
+          const el = document.createElement('div');
+          el.className = 'animal-card';
+          el.textContent = animal;
+          el.style.fontSize = "250px"; 
+          animalContainer.appendChild(el);
+        }, index * displayTimePerItem);
+        memoryTimeouts.push(showId);
+      });
+
+      // 2. 作答
+      const startRecallTime = animals.length * displayTimePerItem;
+      const recallStartId = setTimeout(() => {
+        animalContainer.innerHTML = '<div class="recall-prompt">❓ 請作答</div>';
+      }, startRecallTime);
+      memoryTimeouts.push(recallStartId);
+
+      // 3. 正解
+      const showAnswerTime = startRecallTime + recallTime;
+      const answerStartId = setTimeout(() => {
+        animalContainer.innerHTML = '';
+        const answerBox = document.createElement('div');
+        answerBox.className = 'answer-box';
+        
+        const title = document.createElement('div');
+        title.className = 'answer-title';
+        title.textContent = "✅ 正解";
+        answerBox.appendChild(title);
+
+        const row = document.createElement('div');
+        row.className = 'answer-row';
+        const ansSize = currentLevel > 4 ? "80px" : "100px"; 
+        
+        animals.forEach(a => {
+           const aDiv = document.createElement('div');
+           aDiv.textContent = a;
+           aDiv.style.fontSize = ansSize;
+           aDiv.style.lineHeight = 1;
+           row.appendChild(aDiv);
+        });
+        answerBox.appendChild(row);
+        
+        animalContainer.appendChild(answerBox);
+      }, showAnswerTime);
+      memoryTimeouts.push(answerStartId);
+    }
+
+    function triggerNextQuestion() {
+      if (currentRule === 'REACTION') {
+        const settingTime = getCurrentSettingTime();
+        renderReactionMode();
+        nextQuestionTime = timer + settingTime;
+      } else {
+        const displayTotal = currentLevel * 2;
+        const recallTotal = getCurrentSettingTime(); 
+        const answerRevealBuffer = 4; 
+        
+        runMemorySequence();
+        nextQuestionTime = timer + displayTotal + recallTotal + answerRevealBuffer;
+      }
+    }
+
+    function startLoop() {
+      lastLoopTime = performance.now();
+      lastStepTime = lastLoopTime;
+
+      triggerNextQuestion();
+
+      const loop = (now) => {
+        if (!isRunning || isPaused) return;
+
+        const delta = now - lastLoopTime;
+        if (delta >= 1000) {
+          const addSec = Math.floor(delta / 1000);
+          timer += addSec;
+          lastLoopTime += addSec * 1000;
+          updateTimer();
+        }
+
+        if (now - lastStepTime >= stepInterval) {
+          playFootstep();
+          totalSteps++;
+          lastStepTime = now;
+          updateStats();
+        }
+
+        if (timer >= nextQuestionTime) {
+          triggerNextQuestion();
+        }
+
+        intervalId = requestAnimationFrame(loop);
+      };
+      intervalId = requestAnimationFrame(loop);
+    }
+
+    function resetGameState() {
+      clearTimers();
+      timer = 0;
+      totalSteps = 0;
+      isRunning = false;
+      isPaused = false;
+      updateTimer();
+      updateStats();
+      animalContainer.innerHTML = '<div class="recall-prompt">準備</div>';
+      statsPanelStop.classList.remove('show');
+      statsPanelPause.classList.remove('show');
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      stopBtn.disabled = true;
+    }
+
+    function startTimer() {
+      // 嘗試啟動 AudioContext
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) { try{ new AudioContext().resume(); } catch(e){} }
+
+      resetGameState();
+      isRunning = true;
+      startBtn.disabled = true;
+      pauseBtn.disabled = false;
+      stopBtn.disabled = false;
+      
+      // 如果已經開啟音樂，且YT準備好，則播放
+      if (musicEnabled && playerReady && ytPlayer) {
+        try { ytPlayer.playVideo(); } catch(e){}
+      }
+      
+      startLoop();
+    }
+
+    function pauseGame() {
+      if (!isRunning || isPaused) return;
+      isPaused = true;
+      clearTimers();
+
+      finalTimePauseEl.textContent = formatTime(timer);
+      finalStepsPauseEl.textContent = totalSteps;
+      statsPanelPause.classList.add('show');
+      pauseBtn.disabled = true;
+      stopBtn.disabled = false;
+
+      if (playerReady && ytPlayer && musicEnabled) {
+        try { ytPlayer.pauseVideo(); } catch(e){}
+      }
+    }
+
+    function resumeGame() {
+      if (!isRunning || !isPaused) return;
+      isPaused = false;
+      statsPanelPause.classList.remove('show');
+
+      lastLoopTime = performance.now();
+      lastStepTime = lastLoopTime;
+      
+      triggerNextQuestion();
+      
+      const loop = (now) => {
+        if (!isRunning || isPaused) return;
+        const delta = now - lastLoopTime;
+        if (delta >= 1000) {
+          const addSec = Math.floor(delta / 1000);
+          timer += addSec;
+          lastLoopTime += addSec * 1000;
+          updateTimer();
+        }
+        if (now - lastStepTime >= stepInterval) {
+          playFootstep();
+          totalSteps++;
+          lastStepTime = now;
+          updateStats();
+        }
+        if (timer >= nextQuestionTime) {
+          triggerNextQuestion();
+        }
+        intervalId = requestAnimationFrame(loop);
+      };
+      intervalId = requestAnimationFrame(loop);
+
+      pauseBtn.disabled = false;
+      if (playerReady && ytPlayer && musicEnabled) {
+        try { ytPlayer.playVideo(); } catch(e){}
+      }
+    }
+
+    function stopAll() {
+      clearTimers();
+      isRunning = false;
+      isPaused = false;
+      finalTimeStopEl.textContent = formatTime(timer);
+      finalStepsStopEl.textContent = totalSteps;
+      statsPanelStop.classList.add('show');
+      statsPanelPause.classList.remove('show');
+      startBtn.disabled = true;
+      pauseBtn.disabled = true;
+      stopBtn.disabled = true;
+      
+      if (playerReady && ytPlayer) {
+        try { ytPlayer.pauseVideo(); } catch(e){}
+      }
+    }
+
+    function showRuleOverlay(text) {
+      ruleOverlayText.textContent = text;
+      ruleOverlay.classList.add('show');
+      setTimeout(() => { ruleOverlay.classList.remove('show'); }, 2000);
+    }
+  </script>
+</body>
+</html>
