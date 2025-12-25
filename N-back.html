@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>動物記憶超慢跑 V3.1 (修復版)</title>
+  <title>動物記憶超慢跑 V3.2 (穩定版)</title>
   <style>
     :root {
-      /* 深色模式配色 */
+      /* V3 深色模式配色 */
       --bg: #121212;
       --card: #1e1e1e;
       --accent: #4fc3f7;
-      --accent-hover: #29b6f6;
       --text-main: #e0e0e0;
       --text-sub: #a0a0a0;
       --border-soft: #333333;
@@ -61,7 +60,7 @@
       white-space: nowrap;
     }
 
-    /* 控制列 */
+    /* V1 風格的控制列 (最穩定) */
     .controls-row {
       display: flex;
       justify-content: space-between;
@@ -71,7 +70,6 @@
       border-bottom: 1px solid var(--border-soft);
       margin-bottom: 8px;
       flex-wrap: nowrap;
-      background: var(--card);
     }
 
     .control-group {
@@ -130,10 +128,8 @@
       gap: 4px;
       white-space: nowrap;
     }
-
-    input[type="radio"] {
-      accent-color: var(--accent);
-    }
+    
+    input[type="radio"] { accent-color: var(--accent); }
 
     .buttons {
       display: flex;
@@ -182,7 +178,7 @@
       transform: translateY(-1px);
     }
 
-    /* 主要顯示區域 */
+    /* 顯示區 */
     .display-area {
       flex: 1;
       display: flex;
@@ -193,7 +189,7 @@
       background: var(--card-inner);
       border-radius: 12px;
       margin: 4px 0;
-      overflow: hidden; 
+      overflow: hidden;
     }
 
     .animal-container {
@@ -215,6 +211,7 @@
       animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
+    /* V3 的記憶模式答案框 */
     .answer-box {
       background: #ffffff;
       border: 4px solid #000000;
@@ -280,44 +277,12 @@
 
     .stats-panel.show { display: flex; }
 
-    .stats-title {
-      margin: 0;
-      color: var(--accent);
-      font-size: 1.1rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-    }
-
-    .stat-line {
-      font-size: 0.95rem;
-      color: var(--text-main);
-      line-height: 1.4;
-      margin: 4px 0;
-    }
-
-    .stat-value {
-      color: var(--accent);
-      font-weight: 600;
-      font-size: 1.3rem;
-    }
-
-    .stats-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 8px;
-    }
-
-    .stats-btn {
-      background: var(--card);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    
-    #resumeBtn {
-      background: var(--accent);
-      color: #121212;
-    }
+    .stats-title { margin: 0; color: var(--accent); font-size: 1.1rem; }
+    .stat-line { font-size: 0.95rem; color: var(--text-main); margin: 4px 0; }
+    .stat-value { color: var(--accent); font-weight: 600; font-size: 1.3rem; }
+    .stats-buttons { display: flex; justify-content: center; gap: 10px; margin-top: 8px; }
+    .stats-btn { background: var(--card); border-color: var(--accent); color: var(--accent); }
+    #resumeBtn { background: var(--accent); color: #121212; }
 
     .bottom-wrapper {
       border-top: 1px solid var(--border-soft);
@@ -335,26 +300,9 @@
       font-size: 0.9rem;
     }
 
-    .timer-small {
-      color: var(--accent);
-      font-weight: 500;
-      font-size: 1.1rem;
-      letter-spacing: 0.08em;
-    }
-
-    .steps-text {
-      font-size: 0.85rem;
-      color: var(--text-sub);
-    }
-
-    .footer {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      font-size: 0.75rem;
-      color: var(--text-sub);
-      line-height: 1.3;
-    }
+    .timer-small { color: var(--accent); font-weight: 500; font-size: 1.1rem; }
+    .steps-text { font-size: 0.85rem; color: var(--text-sub); }
+    .footer { display: flex; flex-direction: column; align-items: flex-end; font-size: 0.75rem; color: var(--text-sub); }
 
     .rule-overlay {
       position: absolute;
@@ -367,25 +315,14 @@
       pointer-events: none;
       transition: opacity 0.5s ease;
       z-index: 150;
-      border-radius: 16px;
     }
-
-    .rule-overlay.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
+    .rule-overlay.show { opacity: 1; pointer-events: auto; }
     .rule-overlay-text {
-      font-size: 80px;
-      font-weight: 700;
-      color: #121212;
-      background: var(--accent);
-      padding: 20px 40px;
-      border-radius: 12px;
-      white-space: nowrap;
-      box-shadow: 0 0 20px var(--accent);
+      font-size: 80px; font-weight: 700; color: #121212; background: var(--accent);
+      padding: 20px 40px; border-radius: 12px; white-space: nowrap;
     }
 
+    /* V1 樣式的 Iframe 隱藏方式 */
     #youtubePlayer {
       position: absolute;
       top: -9999px;
@@ -394,41 +331,28 @@
       height: 1px;
       opacity: 0;
       visibility: hidden;
-      pointer-events: none;
     }
-
+    
     .hidden { display: none !important; }
-
-    @media (max-width: 900px) {
-      .rule-overlay-text { font-size: 60px; }
-      .recall-prompt { font-size: 60px; }
-    }
-
-    @media (max-width: 768px) {
-      .controls-row { flex-wrap: wrap; }
-      .control-group { flex: 1 1 45%; }
-      .rule-overlay-text { font-size: 40px; }
-      .display-area { flex-direction: column; }
-    }
   </style>
 </head>
 <body>
   <div class="screen-wrapper">
     <div class="container">
-      <!-- 
-        YouTube 播放器容器 
-        注意：這裡必須是一個 div，YouTube API 會將其替換為 iframe
-      -->
-      <div id="player-container-wrapper" style="position: absolute; top: -9999px; left: -9999px;">
-          <div id="youtubePlayer"></div>
-      </div>
+      
+      <!-- V1 架構：直接使用 iframe，這是最穩定的 -->
+      <iframe id="youtubePlayer"
+        src="https://www.youtube.com/embed/2xGULVj3gCA?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1&loop=1&playlist=2xGULVj3gCA"
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen>
+      </iframe>
 
-      <!-- 規則切換提示 overlay -->
       <div id="ruleOverlay" class="rule-overlay">
         <div id="ruleOverlayText" class="rule-overlay-text">反應訓練</div>
       </div>
 
-      <div class="title">動物記憶超慢跑 V3.1 (修復版)</div>
+      <div class="title">動物記憶超慢跑 V3.2</div>
 
       <!-- 控制項 -->
       <div class="controls-row">
@@ -439,7 +363,7 @@
           <input type="range" id="cadence" min="150" max="200" value="180" />
         </div>
 
-        <!-- 訓練等級 (動物數量) -->
+        <!-- 動物數量 -->
         <div class="control-group">
           <div class="control-label">動物數量</div>
           <div class="radio-options">
@@ -451,7 +375,7 @@
           </div>
         </div>
 
-        <!-- 模式規則 -->
+        <!-- 模式 -->
         <div class="control-group">
           <div class="control-label">訓練模式</div>
           <div class="radio-options">
@@ -460,7 +384,7 @@
           </div>
         </div>
 
-        <!-- 每題秒數 (僅反應模式用) -->
+        <!-- 每題秒數 -->
         <div class="control-group" id="intervalGroup">
           <div class="control-label" id="intervalLabel">每題秒數</div>
           <div class="control-value" id="intervalValue">4秒</div>
@@ -472,16 +396,16 @@
         <button id="startBtn">▶️ 開始</button>
         <button id="pauseBtn" disabled>⏸️ 暫停</button>
         <button id="stopBtn" disabled>⏹️ 停止</button>
-        <button id="musicBtn">🎵 音樂 (準備中...)</button>
+        <button id="musicBtn">🎵 音樂</button>
       </div>
 
-      <!-- 主要顯示區 (動物) -->
+      <!-- 主要顯示區 -->
       <div class="display-area">
         <div id="animalContainer" class="animal-container">
           <div class="recall-prompt">準備</div>
         </div>
         
-        <!-- 結束統計面板 -->
+        <!-- 統計面板 -->
         <div id="statsPanelStop" class="stats-panel">
           <h3 class="stats-title">練習結束</h3>
           <div class="stat-line">總時間：<span class="stat-value" id="finalTimeStop">--</span></div>
@@ -491,7 +415,6 @@
           </div>
         </div>
 
-        <!-- 暫停統計面板 -->
         <div id="statsPanelPause" class="stats-panel">
           <h3 class="stats-title">暫停中</h3>
           <div class="stat-line">目前時間：<span class="stat-value" id="finalTimePause">--</span></div>
@@ -510,19 +433,18 @@
         </div>
         <div class="footer">
           <div>設計：FENG OT</div>
-          <div>目標：工作記憶 & 序列回憶</div>
+          <div>版本：V3.2 (Stable)</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 腳步聲音效 -->
   <audio id="footstep" preload="auto">
     <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoAAAAA=" type="audio/wav">
   </audio>
 
   <script>
-    // --- 資料設定 ---
+    // --- 1. 動物資料 ---
     const ANIMALS = [
       "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", 
       "🦁", "🐮", "🐷", "🐸", "🐵", "🐔", "🐧", "🐦", "🐤", "🦆", 
@@ -535,33 +457,29 @@
       return shuffled.slice(0, count);
     }
 
-    // --- 變數與狀態 ---
+    // --- 2. 系統變數 ---
     let timer = 0;
     let totalSteps = 0;
     let intervalId = null;
     let isRunning = false;
     let isPaused = false;
     let musicEnabled = false;
-    let playerReady = false; // 追蹤 YT 是否載入完成
 
-    // 核心循環變數
     let lastLoopTime = 0;
     let lastStepTime = 0;
     let stepInterval = 60000 / 180;
     let nextQuestionTime = 0;
 
-    // 遊戲設定
-    let currentLevel = 2; // 動物數量 2~6
+    let currentLevel = 2; 
     let currentRule = "REACTION"; 
     let memoryTimeouts = []; 
 
-    // DOM 元素
+    // DOM
     const cadenceSlider = document.getElementById('cadence');
     const intervalSlider = document.getElementById('interval');
     const intervalGroup = document.getElementById('intervalGroup');
     const cadenceValue = document.getElementById('cadenceValue');
     const intervalValue = document.getElementById('intervalValue');
-    const intervalLabel = document.getElementById('intervalLabel');
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const stopBtn = document.getElementById('stopBtn');
@@ -574,7 +492,6 @@
     const ruleRadios = document.querySelectorAll('input[name="rule"]');
     const ruleOverlay = document.getElementById('ruleOverlay');
     const ruleOverlayText = document.getElementById('ruleOverlayText');
-
     const statsPanelStop = document.getElementById('statsPanelStop');
     const finalTimeStopEl = document.getElementById('finalTimeStop');
     const finalStepsStopEl = document.getElementById('finalStepsStop');
@@ -585,47 +502,51 @@
     const pauseRestartBtn = document.getElementById('pauseRestartBtn');
     const resumeBtn = document.getElementById('resumeBtn');
 
-    // YouTube API 邏輯修正
+    // --- 3. 音樂邏輯 (V1 版本，最穩定) ---
     let ytPlayer = null;
 
-    // 1. 下載 API
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-    // 2. API 準備好後建立播放器
-    window.onYouTubeIframeAPIReady = function() {
+    function onYouTubeIframeAPIReady() {
+      // 直接綁定原本就存在的 iframe ID
       ytPlayer = new YT.Player('youtubePlayer', {
-        height: '1',
-        width: '1',
-        videoId: '2xGULVj3gCA', // 超級瑪利歐
-        playerVars: {
-          'playsinline': 1,
-          'controls': 0,
-          'disablekb': 1,
-          'loop': 1,
-          'playlist': '2xGULVj3gCA' 
-        },
         events: {
-          'onReady': onPlayerReady
+          'onReady': function(e) {
+            // 可選：載入後先靜音播放一小段以取得瀏覽器信任 (Pre-warm)
+            // e.target.mute();
+            // e.target.playVideo();
+            // setTimeout(()=>{ e.target.pauseVideo(); e.target.unMute(); }, 500);
+          }
         }
       });
-    };
-
-    function onPlayerReady(event) {
-      playerReady = true;
-      musicBtn.textContent = '🎵 音樂'; // 載入完成，更新按鈕文字
-      // 為了避開瀏覽器自動播放限制，先靜音播放再暫停（Pre-warm）
-      event.target.mute();
-      event.target.playVideo();
-      setTimeout(() => {
-        event.target.pauseVideo();
-        event.target.unMute();
-      }, 1000);
     }
 
-    // --- 輔助函數 ---
+    // 載入 API
+    (function loadYT() {
+      if(!window.YT) {
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      }
+    })();
+
+    function safePlayMusic() {
+      try {
+        if (musicEnabled && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+          ytPlayer.playVideo();
+        }
+      } catch (e) { console.log("Music play error:", e); }
+    }
+
+    function safePauseMusic() {
+      try {
+        if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+          ytPlayer.pauseVideo();
+        }
+      } catch (e) { console.log("Music pause error:", e); }
+    }
+
+    // --- 4. 遊戲邏輯 ---
+
     function playFootstep() {
       footstepAudio.currentTime = 0;
       footstepAudio.play().catch(()=>{});
@@ -653,12 +574,6 @@
       if (count === 5) return "130px";
       if (count === 6) return "110px";
       return "100px";
-    }
-
-    // --- 核心邏輯 ---
-
-    function getCurrentSettingTime() {
-      return parseInt(intervalSlider.value, 10) || 4;
     }
 
     function renderReactionMode() {
@@ -717,242 +632,4 @@
         
         animals.forEach(a => {
            const aDiv = document.createElement('div');
-           aDiv.textContent = a;
-           aDiv.style.fontSize = ansSize;
-           aDiv.style.lineHeight = 1;
-           row.appendChild(aDiv);
-        });
-        answerBox.appendChild(row);
-        
-        animalContainer.appendChild(answerBox);
-      }, showAnswerTime);
-      memoryTimeouts.push(answerStartId);
-    }
-
-    function triggerNextQuestion() {
-      if (currentRule === 'REACTION') {
-        const settingTime = getCurrentSettingTime();
-        renderReactionMode();
-        nextQuestionTime = timer + settingTime;
-      } else {
-        const displayTotal = currentLevel * 2;
-        const recallTotal = currentLevel * 2;
-        const answerRevealBuffer = 4; 
-        
-        runMemorySequence();
-        nextQuestionTime = timer + displayTotal + recallTotal + answerRevealBuffer;
-      }
-    }
-
-    function startLoop() {
-      lastLoopTime = performance.now();
-      lastStepTime = lastLoopTime;
-
-      triggerNextQuestion();
-
-      const loop = (now) => {
-        if (!isRunning || isPaused) return;
-
-        const delta = now - lastLoopTime;
-        if (delta >= 1000) {
-          const addSec = Math.floor(delta / 1000);
-          timer += addSec;
-          lastLoopTime += addSec * 1000;
-          updateTimer();
-        }
-
-        if (now - lastStepTime >= stepInterval) {
-          playFootstep();
-          totalSteps++;
-          lastStepTime = now;
-          updateStats();
-        }
-
-        if (timer >= nextQuestionTime) {
-          triggerNextQuestion();
-        }
-
-        intervalId = requestAnimationFrame(loop);
-      };
-      intervalId = requestAnimationFrame(loop);
-    }
-
-    // --- 狀態控制 ---
-
-    function resetGameState() {
-      clearTimers();
-      timer = 0;
-      totalSteps = 0;
-      isRunning = false;
-      isPaused = false;
-      updateTimer();
-      updateStats();
-      animalContainer.innerHTML = '<div class="recall-prompt">準備</div>';
-      statsPanelStop.classList.remove('show');
-      statsPanelPause.classList.remove('show');
-      startBtn.disabled = false;
-      pauseBtn.disabled = true;
-      stopBtn.disabled = true;
-    }
-
-    function startTimer() {
-      // 確保使用者有互動，嘗試啟動 AudioContext (Safari 需要)
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) { new AudioContext().resume(); }
-
-      resetGameState();
-      isRunning = true;
-      startBtn.disabled = true;
-      pauseBtn.disabled = false;
-      stopBtn.disabled = false;
-      
-      // 如果已開啟音樂，確保播放
-      if (musicEnabled && playerReady && ytPlayer) {
-        ytPlayer.playVideo();
-      }
-      
-      startLoop();
-    }
-
-    function pauseGame() {
-      if (!isRunning || isPaused) return;
-      isPaused = true;
-      clearTimers();
-
-      finalTimePauseEl.textContent = formatTime(timer);
-      finalStepsPauseEl.textContent = totalSteps;
-      statsPanelPause.classList.add('show');
-      pauseBtn.disabled = true;
-      stopBtn.disabled = false;
-
-      if (musicEnabled && playerReady && ytPlayer) {
-        ytPlayer.pauseVideo();
-      }
-    }
-
-    function resumeGame() {
-      if (!isRunning || !isPaused) return;
-      isPaused = false;
-      statsPanelPause.classList.remove('show');
-
-      lastLoopTime = performance.now();
-      lastStepTime = lastLoopTime;
-      
-      triggerNextQuestion();
-      
-      const loop = (now) => {
-        if (!isRunning || isPaused) return;
-        const delta = now - lastLoopTime;
-        if (delta >= 1000) {
-          const addSec = Math.floor(delta / 1000);
-          timer += addSec;
-          lastLoopTime += addSec * 1000;
-          updateTimer();
-        }
-        if (now - lastStepTime >= stepInterval) {
-          playFootstep();
-          totalSteps++;
-          lastStepTime = now;
-          updateStats();
-        }
-        if (timer >= nextQuestionTime) {
-          triggerNextQuestion();
-        }
-        intervalId = requestAnimationFrame(loop);
-      };
-      intervalId = requestAnimationFrame(loop);
-
-      pauseBtn.disabled = false;
-      if (musicEnabled && playerReady && ytPlayer) {
-        ytPlayer.playVideo();
-      }
-    }
-
-    function stopAll() {
-      clearTimers();
-      isRunning = false;
-      isPaused = false;
-      finalTimeStopEl.textContent = formatTime(timer);
-      finalStepsStopEl.textContent = totalSteps;
-      statsPanelStop.classList.add('show');
-      statsPanelPause.classList.remove('show');
-      startBtn.disabled = true;
-      pauseBtn.disabled = true;
-      stopBtn.disabled = true;
-      
-      if (playerReady && ytPlayer) {
-        ytPlayer.pauseVideo();
-      }
-    }
-
-    function showRuleOverlay(text) {
-      ruleOverlayText.textContent = text;
-      ruleOverlay.classList.add('show');
-      setTimeout(() => { ruleOverlay.classList.remove('show'); }, 2000);
-    }
-
-    // --- 事件監聽 ---
-
-    musicBtn.onclick = () => {
-      if (!playerReady) {
-        alert("音樂載入中...請稍候再試 (若一直無法載入請檢查網路)");
-        return;
-      }
-      
-      musicEnabled = !musicEnabled;
-      if (musicEnabled) {
-        musicBtn.textContent = '🔇 關音樂';
-        musicBtn.classList.add('active');
-        if (isRunning || (isPaused === false && timer > 0)) {
-           // 只有在遊戲進行中才播放
-           ytPlayer.playVideo();
-        }
-      } else {
-        musicBtn.textContent = '🎵 音樂';
-        musicBtn.classList.remove('active');
-        ytPlayer.pauseVideo();
-      }
-    };
-
-    cadenceSlider.oninput = () => {
-      cadenceValue.textContent = cadenceSlider.value;
-      stepInterval = 60000 / parseInt(cadenceSlider.value, 10);
-    };
-
-    intervalSlider.oninput = () => {
-      intervalValue.textContent = intervalSlider.value + '秒';
-    };
-
-    levelRadios.forEach(r => {
-      r.addEventListener('change', () => {
-        currentLevel = parseInt(r.value, 10);
-        if (!isRunning) {
-           animalContainer.innerHTML = '<div class="recall-prompt">準備</div>';
-        }
-      });
-    });
-
-    ruleRadios.forEach(r => {
-      r.addEventListener('change', () => {
-        currentRule = r.value;
-        if (currentRule === "REACTION") {
-          showRuleOverlay("反應訓練");
-          intervalGroup.classList.remove('hidden'); 
-        } else {
-          showRuleOverlay("記憶訓練");
-          intervalGroup.classList.add('hidden'); 
-        }
-        if(!isRunning) animalContainer.innerHTML = '<div class="recall-prompt">準備</div>';
-      });
-    });
-
-    startBtn.onclick = () => { if (!isRunning) startTimer(); };
-    pauseBtn.onclick = () => { pauseGame(); };
-    stopBtn.onclick = () => { if (isRunning || isPaused) stopAll(); };
-    restartBtn.onclick = () => { statsPanelStop.classList.remove('show'); startTimer(); };
-    pauseRestartBtn.onclick = () => { statsPanelPause.classList.remove('show'); startTimer(); };
-    resumeBtn.onclick = () => { resumeGame(); };
-
-  </script>
-</body>
-</html>
+           aDiv.textContent = a
