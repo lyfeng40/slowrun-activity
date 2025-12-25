@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>動物記憶超慢跑 V3.2 (穩定版)</title>
+  <title>動物記憶超慢跑 V3.2 (秒數即時調整版)</title>
   <style>
     :root {
-      /* V3 深色模式配色 */
+      /* 深色模式配色 */
       --bg: #121212;
       --card: #1e1e1e;
       --accent: #4fc3f7;
+      --accent-hover: #29b6f6;
       --text-main: #e0e0e0;
       --text-sub: #a0a0a0;
       --border-soft: #333333;
@@ -60,7 +61,7 @@
       white-space: nowrap;
     }
 
-    /* V1 風格的控制列 (最穩定) */
+    /* 控制列 */
     .controls-row {
       display: flex;
       justify-content: space-between;
@@ -70,6 +71,7 @@
       border-bottom: 1px solid var(--border-soft);
       margin-bottom: 8px;
       flex-wrap: nowrap;
+      background: var(--card);
     }
 
     .control-group {
@@ -128,8 +130,10 @@
       gap: 4px;
       white-space: nowrap;
     }
-    
-    input[type="radio"] { accent-color: var(--accent); }
+
+    input[type="radio"] {
+      accent-color: var(--accent);
+    }
 
     .buttons {
       display: flex;
@@ -178,7 +182,7 @@
       transform: translateY(-1px);
     }
 
-    /* 顯示區 */
+    /* 主要顯示區域 */
     .display-area {
       flex: 1;
       display: flex;
@@ -189,7 +193,7 @@
       background: var(--card-inner);
       border-radius: 12px;
       margin: 4px 0;
-      overflow: hidden;
+      overflow: hidden; 
     }
 
     .animal-container {
@@ -211,7 +215,6 @@
       animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    /* V3 的記憶模式答案框 */
     .answer-box {
       background: #ffffff;
       border: 4px solid #000000;
@@ -277,12 +280,44 @@
 
     .stats-panel.show { display: flex; }
 
-    .stats-title { margin: 0; color: var(--accent); font-size: 1.1rem; }
-    .stat-line { font-size: 0.95rem; color: var(--text-main); margin: 4px 0; }
-    .stat-value { color: var(--accent); font-weight: 600; font-size: 1.3rem; }
-    .stats-buttons { display: flex; justify-content: center; gap: 10px; margin-top: 8px; }
-    .stats-btn { background: var(--card); border-color: var(--accent); color: var(--accent); }
-    #resumeBtn { background: var(--accent); color: #121212; }
+    .stats-title {
+      margin: 0;
+      color: var(--accent);
+      font-size: 1.1rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+    }
+
+    .stat-line {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      line-height: 1.4;
+      margin: 4px 0;
+    }
+
+    .stat-value {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 1.3rem;
+    }
+
+    .stats-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .stats-btn {
+      background: var(--card);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    #resumeBtn {
+      background: var(--accent);
+      color: #121212;
+    }
 
     .bottom-wrapper {
       border-top: 1px solid var(--border-soft);
@@ -300,9 +335,26 @@
       font-size: 0.9rem;
     }
 
-    .timer-small { color: var(--accent); font-weight: 500; font-size: 1.1rem; }
-    .steps-text { font-size: 0.85rem; color: var(--text-sub); }
-    .footer { display: flex; flex-direction: column; align-items: flex-end; font-size: 0.75rem; color: var(--text-sub); }
+    .timer-small {
+      color: var(--accent);
+      font-weight: 500;
+      font-size: 1.1rem;
+      letter-spacing: 0.08em;
+    }
+
+    .steps-text {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
+    .footer {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      line-height: 1.3;
+    }
 
     .rule-overlay {
       position: absolute;
@@ -315,39 +367,51 @@
       pointer-events: none;
       transition: opacity 0.5s ease;
       z-index: 150;
-    }
-    .rule-overlay.show { opacity: 1; pointer-events: auto; }
-    .rule-overlay-text {
-      font-size: 80px; font-weight: 700; color: #121212; background: var(--accent);
-      padding: 20px 40px; border-radius: 12px; white-space: nowrap;
+      border-radius: 16px;
     }
 
-    /* V1 樣式的 Iframe 隱藏方式 */
-    #youtubePlayer {
-      position: absolute;
-      top: -9999px;
-      left: -9999px;
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-      visibility: hidden;
+    .rule-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
     }
-    
-    .hidden { display: none !important; }
+
+    .rule-overlay-text {
+      font-size: 80px;
+      font-weight: 700;
+      color: #121212;
+      background: var(--accent);
+      padding: 20px 40px;
+      border-radius: 12px;
+      white-space: nowrap;
+      box-shadow: 0 0 20px var(--accent);
+    }
+
+    #youtubePlayer {
+      pointer-events: none;
+    }
+
+    @media (max-width: 900px) {
+      .rule-overlay-text { font-size: 60px; }
+      .recall-prompt { font-size: 60px; }
+    }
+
+    @media (max-width: 768px) {
+      .controls-row { flex-wrap: wrap; }
+      .control-group { flex: 1 1 45%; }
+      .rule-overlay-text { font-size: 40px; }
+      .display-area { flex-direction: column; }
+    }
   </style>
 </head>
 <body>
   <div class="screen-wrapper">
     <div class="container">
-      
-      <!-- V1 架構：直接使用 iframe，這是最穩定的 -->
-      <iframe id="youtubePlayer"
-        src="https://www.youtube.com/embed/2xGULVj3gCA?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1&loop=1&playlist=2xGULVj3gCA"
-        frameborder="0"
-        allow="autoplay; encrypted-media"
-        allowfullscreen>
-      </iframe>
+      <!-- YouTube 播放器 -->
+      <div id="player-container-wrapper" style="position: absolute; top: -9999px; left: -9999px;">
+          <div id="youtubePlayer"></div>
+      </div>
 
+      <!-- 規則切換提示 -->
       <div id="ruleOverlay" class="rule-overlay">
         <div id="ruleOverlayText" class="rule-overlay-text">反應訓練</div>
       </div>
@@ -363,7 +427,7 @@
           <input type="range" id="cadence" min="150" max="200" value="180" />
         </div>
 
-        <!-- 動物數量 -->
+        <!-- 訓練等級 -->
         <div class="control-group">
           <div class="control-label">動物數量</div>
           <div class="radio-options">
@@ -375,7 +439,7 @@
           </div>
         </div>
 
-        <!-- 模式 -->
+        <!-- 模式規則 -->
         <div class="control-group">
           <div class="control-label">訓練模式</div>
           <div class="radio-options">
@@ -384,11 +448,11 @@
           </div>
         </div>
 
-        <!-- 每題秒數 -->
+        <!-- 每題秒數 (恢復顯示，且即時連動) -->
         <div class="control-group" id="intervalGroup">
-          <div class="control-label" id="intervalLabel">每題秒數</div>
+          <div class="control-label" id="intervalLabel">間隔/秒數</div>
           <div class="control-value" id="intervalValue">4秒</div>
-          <input type="range" id="interval" min="3" max="15" value="4" />
+          <input type="range" id="interval" min="2" max="15" value="4" />
         </div>
       </div>
 
@@ -396,16 +460,15 @@
         <button id="startBtn">▶️ 開始</button>
         <button id="pauseBtn" disabled>⏸️ 暫停</button>
         <button id="stopBtn" disabled>⏹️ 停止</button>
-        <button id="musicBtn">🎵 音樂</button>
+        <button id="musicBtn">🎵 音樂 (準備中...)</button>
       </div>
 
-      <!-- 主要顯示區 -->
+      <!-- 顯示區 -->
       <div class="display-area">
         <div id="animalContainer" class="animal-container">
           <div class="recall-prompt">準備</div>
         </div>
         
-        <!-- 統計面板 -->
         <div id="statsPanelStop" class="stats-panel">
           <h3 class="stats-title">練習結束</h3>
           <div class="stat-line">總時間：<span class="stat-value" id="finalTimeStop">--</span></div>
@@ -432,204 +495,4 @@
           <div class="steps-text">步數：<span id="totalSteps">0</span></div>
         </div>
         <div class="footer">
-          <div>設計：FENG OT</div>
-          <div>版本：V3.2 (Stable)</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <audio id="footstep" preload="auto">
-    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoAAAAA=" type="audio/wav">
-  </audio>
-
-  <script>
-    // --- 1. 動物資料 ---
-    const ANIMALS = [
-      "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", 
-      "🦁", "🐮", "🐷", "🐸", "🐵", "🐔", "🐧", "🐦", "🐤", "🦆", 
-      "🦅", "🦉", "🦇", "🐺", "🐗", "🐴", "🦄", "🐝", "🐛", "🦋", 
-      "🐌", "🐞", "🐜", "🕷", "🐢", "🐍"
-    ];
-
-    function getRandomAnimals(count) {
-      const shuffled = [...ANIMALS].sort(() => 0.5 - Math.random());
-      return shuffled.slice(0, count);
-    }
-
-    // --- 2. 系統變數 ---
-    let timer = 0;
-    let totalSteps = 0;
-    let intervalId = null;
-    let isRunning = false;
-    let isPaused = false;
-    let musicEnabled = false;
-
-    let lastLoopTime = 0;
-    let lastStepTime = 0;
-    let stepInterval = 60000 / 180;
-    let nextQuestionTime = 0;
-
-    let currentLevel = 2; 
-    let currentRule = "REACTION"; 
-    let memoryTimeouts = []; 
-
-    // DOM
-    const cadenceSlider = document.getElementById('cadence');
-    const intervalSlider = document.getElementById('interval');
-    const intervalGroup = document.getElementById('intervalGroup');
-    const cadenceValue = document.getElementById('cadenceValue');
-    const intervalValue = document.getElementById('intervalValue');
-    const startBtn = document.getElementById('startBtn');
-    const pauseBtn = document.getElementById('pauseBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const musicBtn = document.getElementById('musicBtn');
-    const timerEl = document.getElementById('timer');
-    const totalStepsEl = document.getElementById('totalSteps');
-    const animalContainer = document.getElementById('animalContainer');
-    const footstepAudio = document.getElementById('footstep');
-    const levelRadios = document.querySelectorAll('input[name="level"]');
-    const ruleRadios = document.querySelectorAll('input[name="rule"]');
-    const ruleOverlay = document.getElementById('ruleOverlay');
-    const ruleOverlayText = document.getElementById('ruleOverlayText');
-    const statsPanelStop = document.getElementById('statsPanelStop');
-    const finalTimeStopEl = document.getElementById('finalTimeStop');
-    const finalStepsStopEl = document.getElementById('finalStepsStop');
-    const restartBtn = document.getElementById('restartBtn');
-    const statsPanelPause = document.getElementById('statsPanelPause');
-    const finalTimePauseEl = document.getElementById('finalTimePause');
-    const finalStepsPauseEl = document.getElementById('finalStepsPause');
-    const pauseRestartBtn = document.getElementById('pauseRestartBtn');
-    const resumeBtn = document.getElementById('resumeBtn');
-
-    // --- 3. 音樂邏輯 (V1 版本，最穩定) ---
-    let ytPlayer = null;
-
-    function onYouTubeIframeAPIReady() {
-      // 直接綁定原本就存在的 iframe ID
-      ytPlayer = new YT.Player('youtubePlayer', {
-        events: {
-          'onReady': function(e) {
-            // 可選：載入後先靜音播放一小段以取得瀏覽器信任 (Pre-warm)
-            // e.target.mute();
-            // e.target.playVideo();
-            // setTimeout(()=>{ e.target.pauseVideo(); e.target.unMute(); }, 500);
-          }
-        }
-      });
-    }
-
-    // 載入 API
-    (function loadYT() {
-      if(!window.YT) {
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      }
-    })();
-
-    function safePlayMusic() {
-      try {
-        if (musicEnabled && ytPlayer && typeof ytPlayer.playVideo === 'function') {
-          ytPlayer.playVideo();
-        }
-      } catch (e) { console.log("Music play error:", e); }
-    }
-
-    function safePauseMusic() {
-      try {
-        if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
-          ytPlayer.pauseVideo();
-        }
-      } catch (e) { console.log("Music pause error:", e); }
-    }
-
-    // --- 4. 遊戲邏輯 ---
-
-    function playFootstep() {
-      footstepAudio.currentTime = 0;
-      footstepAudio.play().catch(()=>{});
-    }
-
-    function formatTime(seconds) {
-      const m = Math.floor(seconds / 60).toString().padStart(2,'0');
-      const s = (seconds % 60).toString().padStart(2,'0');
-      return `${m}:${s}`;
-    }
-
-    function updateTimer() { timerEl.textContent = formatTime(timer); }
-    function updateStats() { totalStepsEl.textContent = totalSteps; }
-
-    function clearTimers() {
-      if (intervalId) { cancelAnimationFrame(intervalId); intervalId = null; }
-      memoryTimeouts.forEach(id => clearTimeout(id));
-      memoryTimeouts = [];
-    }
-
-    function getFontSizeForLevel(count) {
-      if (count <= 2) return "250px";
-      if (count === 3) return "200px";
-      if (count === 4) return "160px";
-      if (count === 5) return "130px";
-      if (count === 6) return "110px";
-      return "100px";
-    }
-
-    function renderReactionMode() {
-      const animals = getRandomAnimals(currentLevel);
-      animalContainer.innerHTML = '';
-      const fSize = getFontSizeForLevel(currentLevel);
-      
-      animals.forEach(animal => {
-        const el = document.createElement('div');
-        el.className = 'animal-card';
-        el.textContent = animal;
-        el.style.fontSize = fSize;
-        animalContainer.appendChild(el);
-      });
-    }
-
-    function runMemorySequence() {
-      const animals = getRandomAnimals(currentLevel);
-      const displayTimePerItem = 2000; 
-      const recallTime = currentLevel * 2000; 
-      
-      animalContainer.innerHTML = '';
-
-      animals.forEach((animal, index) => {
-        const showId = setTimeout(() => {
-          animalContainer.innerHTML = ''; 
-          const el = document.createElement('div');
-          el.className = 'animal-card';
-          el.textContent = animal;
-          el.style.fontSize = "250px"; 
-          animalContainer.appendChild(el);
-        }, index * displayTimePerItem);
-        memoryTimeouts.push(showId);
-      });
-
-      const startRecallTime = animals.length * displayTimePerItem;
-      const recallStartId = setTimeout(() => {
-        animalContainer.innerHTML = '<div class="recall-prompt">❓ 請作答</div>';
-      }, startRecallTime);
-      memoryTimeouts.push(recallStartId);
-
-      const showAnswerTime = startRecallTime + recallTime;
-      const answerStartId = setTimeout(() => {
-        animalContainer.innerHTML = '';
-        const answerBox = document.createElement('div');
-        answerBox.className = 'answer-box';
-        
-        const title = document.createElement('div');
-        title.className = 'answer-title';
-        title.textContent = "✅ 正解";
-        answerBox.appendChild(title);
-
-        const row = document.createElement('div');
-        row.className = 'answer-row';
-        const ansSize = currentLevel > 4 ? "80px" : "100px"; 
-        
-        animals.forEach(a => {
-           const aDiv = document.createElement('div');
-           aDiv.textContent = a
+          <div>設計
