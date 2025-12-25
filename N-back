@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>動物記憶超慢跑體智活動 V2 (深色版)</title>
+  <style>
+    :root {
+      /* 深色模式配色 */
+      --bg: #121212;
+      --card: #1e1e1e;
+      --accent: #4fc3f7; /* 亮藍色，深色底清楚 */
+      --accent-hover: #29b6f6;
+      --text-main: #e0e0e0;
+      --text-sub: #a0a0a0;
+      --border-soft: #333333;
+      --card-inner: #2d2d2d;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Microsoft JhengHei", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .screen-wrapper {
+      width: 90vw;
+      max-width: 1280px;
+      aspect-ratio: 16 / 9;
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+      overflow: hidden;
+      display: flex;
+      border: 1px solid var(--border-soft);
+    }
+
+    .container {
+      width: 100%;
+      height: 100%;
+      padding: 16px 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      margin-bottom: 6px;
+      white-space: nowrap;
+    }
+
+    /* 控制列 */
+    .controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-soft);
+      margin-bottom: 8px;
+      flex-wrap: nowrap;
+      background: var(--card);
+    }
+
+    .control-group {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+    }
+
+    .control-label {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      margin-bottom: 4px;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .control-value {
+      font-size: 0.95rem;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      max-width: 160px;
+      height: 4px;
+      background: #444;
+      border-radius: 999px;
+      appearance: none;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+
+    .radio-options {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      flex-wrap: wrap;
+    }
+
+    .radio-options label {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    input[type="radio"] {
+      accent-color: var(--accent);
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid var(--border-soft);
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      flex: 1;
+      max-width: 120px;
+      white-space: nowrap;
+      background: #2a2a2a;
+      color: var(--text-main);
+    }
+
+    #startBtn {
+      background: var(--card);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    #musicBtn.active {
+      background: var(--accent);
+      color: #121212;
+      border-color: var(--accent);
+    }
+
+    button:disabled {
+      opacity: 0.3;
+      cursor: default;
+      border-color: #444;
+      color: #666;
+    }
+
+    button:not(:disabled):hover {
+      background: #333;
+      transform: translateY(-1px);
+    }
+
+    /* 主要顯示區域 */
+    .display-area {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      min-height: 0;
+      background: var(--card-inner);
+      border-radius: 12px;
+      margin: 4px 0;
+    }
+
+    .animal-container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* 動物卡片樣式 */
+    .animal-card {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 150px; /* 動物圖示大小 */
+      line-height: 1;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .recall-prompt {
+      font-size: 80px;
+      color: var(--text-sub);
+      font-weight: bold;
+      animation: fadeIn 0.5s;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* 統計面板 */
+    .stats-panel {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 80%;
+      max-width: 380px;
+      background: rgba(30, 30, 30, 0.98);
+      border-radius: 16px;
+      padding: 18px 16px;
+      text-align: center;
+      z-index: 100;
+      box-sizing: border-box;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid var(--accent);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    }
+
+    .stats-panel.show { display: flex; }
+
+    .stats-title {
+      margin: 0;
+      color: var(--accent);
+      font-size: 1.1rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+    }
+
+    .stat-line {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      line-height: 1.4;
+      margin: 4px 0;
+    }
+
+    .stat-value {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 1.3rem;
+    }
+
+    .stats-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .stats-btn {
+      background: var(--card);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    #resumeBtn {
+      background: var(--accent);
+      color: #121212;
+    }
+
+    /* 底部資訊 */
+    .bottom-wrapper {
+      border-top: 1px solid var(--border-soft);
+      padding-top: 6px;
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bottom-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .timer-small {
+      color: var(--accent);
+      font-weight: 500;
+      font-size: 1.1rem;
+      letter-spacing: 0.08em;
+    }
+
+    .steps-text {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
+    .footer {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      line-height: 1.3;
+    }
+
+    /* 規則切換提示 overlay */
+    .rule-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      z-index: 150;
+      border-radius: 16px;
+    }
+
+    .rule-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .rule-overlay-text {
+      font-size: 80px;
+      font-weight: 700;
+      color: #121212;
+      background: var(--accent);
+      padding: 20px 40px;
+      border-radius: 12px;
+      white-space: nowrap;
+      box-shadow: 0 0 20px var(--accent);
+    }
+
+    #youtubePlayer {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    @media (max-width: 900px) {
+      .animal-card { font-size: 100px; }
+      .rule-overlay-text { font-size: 60px; }
+    }
+
+    @media (max-width: 768px) {
+      .controls-row { flex-wrap: wrap; }
+      .control-group { flex: 1 1 45%; }
+      .animal-card { font-size: 80px; }
+      .rule-overlay-text { font-size: 40px; }
+      .display-area { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="screen-wrapper">
+    <div class="container">
+      <!-- YouTube 音樂 (預設為放鬆/專注背景音樂) -->
+      <iframe id="youtubePlayer"
+        src="https://www.youtube.com/embed/5qap5aO4i9A?enablejsapi=1&origin=*&autoplay=0&controls=0&modestbranding=1&rel=0&disablekb=1&loop=1"
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen>
+      </iframe>
+
+      <!-- 規則切換提示 overlay -->
+      <div id="ruleOverlay" class="rule-overlay">
+        <div id="ruleOverlayText" class="rule-overlay-text">反應訓練</div>
+      </div>
+
+      <div class="title">動物記憶超慢跑 V2</div>
+
+      <!-- 控制項 -->
+      <div class="controls-row">
+        <!-- 步頻 -->
+        <div class="control-group">
+          <div class="control-label">步頻 (BPM)</div>
+          <div class="control-value" id="cadenceValue">180</div>
+          <input type="range" id="cadence" min="150" max="200" value="180" />
+        </div>
+
+        <!-- 訓練等級 (動物數量) -->
+        <div class="control-group">
+          <div class="control-label">動物數量 (Level)</div>
+          <div class="radio-options">
+            <label><input type="radio" name="level" value="2" checked> 2隻</label>
+            <label><input type="radio" name="level" value="3"> 3隻</label>
+            <label><input type="radio" name="level" value="4"> 4隻</label>
+          </div>
+        </div>
+
+        <!-- 模式規則 -->
+        <div class="control-group">
+          <div class="control-label">訓練模式</div>
+          <div class="radio-options">
+            <label><input type="radio" name="rule" value="REACTION" checked> 反應</label>
+            <label><input type="radio" name="rule" value="MEMORY"> 記憶</label>
+          </div>
+        </div>
+
+        <!-- 每題秒數 / 作答時間 -->
+        <div class="control-group">
+          <div class="control-label" id="intervalLabel">每題秒數</div>
+          <div class="control-value" id="intervalValue">4秒</div>
+          <input type="range" id="interval" min="3" max="15" value="4" />
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button id="startBtn">▶️ 開始</button>
+        <button id="pauseBtn" disabled>⏸️ 暫停</button>
+        <button id="stopBtn" disabled>⏹️ 停止</button>
+        <button id="musicBtn">🎵 音樂</button>
+      </div>
+
+      <!-- 主要顯示區 (動物) -->
+      <div class="display-area">
+        <div id="animalContainer" class="animal-container">
+          <div class="recall-prompt">準備</div>
+        </div>
+        
+        <!-- 結束統計面板 -->
+        <div id="statsPanelStop" class="stats-panel">
+          <h3 class="stats-title">練習結束</h3>
+          <div class="stat-line">總時間：<span class="stat-value" id="finalTimeStop">--</span></div>
+          <div class="stat-line">總步數：<span class="stat-value" id="finalStepsStop">--</span></div>
+          <div class="stats-buttons">
+            <button id="restartBtn" class="stats-btn">重新開始</button>
+          </div>
+        </div>
+
+        <!-- 暫停統計面板 -->
+        <div id="statsPanelPause" class="stats-panel">
+          <h3 class="stats-title">暫停中</h3>
+          <div class="stat-line">目前時間：<span class="stat-value" id="finalTimePause">--</span></div>
+          <div class="stat-line">目前步數：<span class="stat-value" id="finalStepsPause">--</span></div>
+          <div class="stats-buttons">
+            <button id="pauseRestartBtn" class="stats-btn">重新開始</button>
+            <button id="resumeBtn" class="stats-btn">繼續</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-wrapper">
+        <div class="bottom-stats">
+          <div class="timer-small" id="timer">00:00</div>
+          <div class="steps-text">步數：<span id="totalSteps">0</span></div>
+        </div>
+        <div class="footer">
+          <div>設計：FENG OT</div>
+          <div>目標：工作記憶 (Working Memory) & 序列回憶</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 腳步聲音效 -->
+  <audio id="footstep" preload="auto">
+    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoAAAAA=" type="audio/wav">
+  </audio>
+
+  <script>
+    // --- 資料設定 ---
+    // 36種動物清單 (使用 Emoji 確保相容性，若需改為真實圖片，請修改 renderAnimal 函數)
+    const ANIMALS = [
+      "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", 
+      "🦁", "🐮", "🐷", "🐸", "🐵", "🐔", "🐧", "🐦", "🐤", "🦆", 
+      "🦅", "🦉", "🦇", "🐺", "🐗", "🐴", "🦄", "🐝", "🐛", "🦋", 
+      "🐌", "🐞", "🐜", "🕷", "🐢", "🐍"
+    ];
+
+    function getRandomAnimals(count) {
+      const shuffled = [...ANIMALS].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    }
+
+    // --- 變數與狀態 ---
+    let timer = 0;
+    let totalSteps = 0;
+    let intervalId = null;
+    let isRunning = false;
+    let isPaused = false;
+    let musicEnabled = false;
+
+    // 核心循環變數
+    let lastLoopTime = 0;
+    let lastStepTime = 0;
+    let stepInterval = 60000 / 180;
+    let nextQuestionTime = 0;
+
+    // 遊戲設定
+    let currentLevel = 2; // 動物數量 2, 3, 4
+    let currentRule = "REACTION"; // "REACTION" 或 "MEMORY"
+    let memoryTimeouts = []; // 儲存記憶模式下的 timeout ID 以便清除
+
+    // DOM 元素
+    const cadenceSlider = document.getElementById('cadence');
+    const intervalSlider = document.getElementById('interval');
+    const cadenceValue = document.getElementById('cadenceValue');
+    const intervalValue = document.getElementById('intervalValue');
+    const intervalLabel = document.getElementById('intervalLabel');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const musicBtn = document.getElementById('musicBtn');
+    const timerEl = document.getElementById('timer');
+    const totalStepsEl = document.getElementById('totalSteps');
+    const animalContainer = document.getElementById('animalContainer');
+    const footstepAudio = document.getElementById('footstep');
+    const levelRadios = document.querySelectorAll('input[name="level"]');
+    const ruleRadios = document.querySelectorAll('input[name="rule"]');
+    const ruleOverlay = document.getElementById('ruleOverlay');
+    const ruleOverlayText = document.getElementById('ruleOverlayText');
+
+    // 統計面板
+    const statsPanelStop = document.getElementById('statsPanelStop');
+    const finalTimeStopEl = document.getElementById('finalTimeStop');
+    const finalStepsStopEl = document.getElementById('finalStepsStop');
+    const restartBtn = document.getElementById('restartBtn');
+    const statsPanelPause = document.getElementById('statsPanelPause');
+    const finalTimePauseEl = document.getElementById('finalTimePause');
+    const finalStepsPauseEl = document.getElementById('finalStepsPause');
+    const pauseRestartBtn = document.getElementById('pauseRestartBtn');
+    const resumeBtn = document.getElementById('resumeBtn');
+
+    // YouTube API
+    let ytPlayer = null;
+    function onYouTubeIframeAPIReady() {
+      ytPlayer = new YT.Player('youtubePlayer', {});
+    }
+    (function loadYT() {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    })();
+
+    // --- 輔助函數 ---
+    function playFootstep() {
+      footstepAudio.currentTime = 0;
+      footstepAudio.play().catch(()=>{});
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60).toString().padStart(2,'0');
+      const s = (seconds % 60).toString().padStart(2,'0');
+      return `${m}:${s}`;
+    }
+
+    function updateTimer() { timerEl.textContent = formatTime(timer); }
+    function updateStats() { totalStepsEl.textContent = totalSteps; }
+
+    function clearTimers() {
+      if (intervalId) { cancelAnimationFrame(intervalId); intervalId = null; }
+      memoryTimeouts.forEach(id => clearTimeout(id));
+      memoryTimeouts = [];
+    }
+
+    // --- 核心邏輯 ---
+
+    // 取得當前設定的間隔時間 (反應模式=每題間隔, 記憶模式=作答時間)
+    function getCurrentSettingTime() {
+      return parseInt(intervalSlider.value, 10) || 4;
+    }
+
+    // 顯示一組動物 (反應模式用)
+    function renderReactionMode() {
+      const animals = getRandomAnimals(currentLevel);
+      animalContainer.innerHTML = '';
+      animals.forEach(animal => {
+        const el = document.createElement('div');
+        el.className = 'animal-card';
+        el.textContent = animal;
+        // 如果您想改用圖片，請將上一行註解，並取消下一行註解：
+        // el.innerHTML = `<img src="您的圖片路徑/${animal}.jpg" style="width:100px;">`;
+        animalContainer.appendChild(el);
+      });
+    }
+
+    // 執行記憶序列 (記憶模式用)
+    function runMemorySequence() {
+      const animals = getRandomAnimals(currentLevel);
+      const displayTimePerItem = 2000; // 每一張停留 2 秒
+      
+      // 清空畫面
+      animalContainer.innerHTML = '';
+
+      // 依序顯示
+      animals.forEach((animal, index) => {
+        const showId = setTimeout(() => {
+          animalContainer.innerHTML = ''; // 先清空
+          const el = document.createElement('div');
+          el.className = 'animal-card';
+          el.textContent = animal;
+          animalContainer.appendChild(el);
+        }, index * displayTimePerItem);
+        memoryTimeouts.push(showId);
+      });
+
+      // 顯示結束後，進入回憶階段
+      const recallStartId = setTimeout(() => {
+        animalContainer.innerHTML = '<div class="recall-prompt">❓ 請回答</div>';
+      }, animals.length * displayTimePerItem);
+      memoryTimeouts.push(recallStartId);
+    }
+
+    // 觸發下一次題目
+    function triggerNextQuestion() {
+      const settingTime = getCurrentSettingTime();
+
+      if (currentRule === 'REACTION') {
+        // 反應模式：直接顯示，並設定下次時間 = 當前 + 設定秒數
+        renderReactionMode();
+        nextQuestionTime = timer + settingTime;
+      } else {
+        // 記憶模式：
+        // 總耗時 = (動物數量 * 2秒) + (作答時間 settingTime)
+        const sequenceDuration = currentLevel * 2;
+        const totalRoundDuration = sequenceDuration + settingTime;
+        
+        runMemorySequence();
+        nextQuestionTime = timer + totalRoundDuration;
+      }
+    }
+
+    // 主循環
+    function startLoop() {
+      lastLoopTime = performance.now();
+      lastStepTime = lastLoopTime;
+
+      // 剛開始立即觸發第一題
+      triggerNextQuestion();
+
+      const loop = (now) => {
+        if (!isRunning || isPaused) return;
+
+        const delta = now - lastLoopTime;
+        // 每秒更新 Timer
+        if (delta >= 1000) {
+          const addSec = Math.floor(delta / 1000);
+          timer += addSec;
+          lastLoopTime += addSec * 1000;
+          updateTimer();
+        }
+
+        // 節拍器與步數
+        if (now - lastStepTime >= stepInterval) {
+          playFootstep();
+          totalSteps++;
+          lastStepTime = now;
+          updateStats();
+        }
+
+        // 檢查是否該出下一題
+        if (timer >= nextQuestionTime) {
+          triggerNextQuestion();
+        }
+
+        intervalId = requestAnimationFrame(loop);
+      };
+      intervalId = requestAnimationFrame(loop);
+    }
+
+    // --- 狀態控制 ---
+
+    function resetGameState() {
+      clearTimers();
+      timer = 0;
+      totalSteps = 0;
+      isRunning = false;
+      isPaused = false;
+      updateTimer();
+      updateStats();
+      animalContainer.innerHTML = '<div class="recall-prompt">準備</div>';
+      statsPanelStop.classList.remove('show');
+      statsPanelPause.classList.remove('show');
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      stopBtn.disabled = true;
+    }
+
+    function startTimer() {
+      resetGameState();
+      isRunning = true;
+      startBtn.disabled = true;
+      pauseBtn.disabled = false;
+      stopBtn.disabled = false;
+      startLoop();
+      if (musicEnabled && ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+    }
+
+    function pauseGame() {
+      if (!isRunning || isPaused) return;
+      isPaused = true;
+      clearTimers(); // 暫停時清除所有計時器，包含記憶模式的閃現
+
+      finalTimePauseEl.textContent = formatTime(timer);
+      finalStepsPauseEl.textContent = totalSteps;
+      statsPanelPause.classList.add('show');
+      pauseBtn.disabled = true;
+      stopBtn.disabled = false;
+
+      if (ytPlayer && ytPlayer.pauseVideo && musicEnabled) ytPlayer.pauseVideo();
+    }
+
+    function resumeGame() {
+      if (!isRunning || !isPaused) return;
+      isPaused = false;
+      statsPanelPause.classList.remove('show');
+
+      // 恢復時比較棘手，為了簡單起見，恢復後直接進入下一題的等待或立即觸發
+      // 這裡選擇：重置 Loop 時間，並立即觸發一個新題目以確保流程順暢
+      lastLoopTime = performance.now();
+      lastStepTime = lastLoopTime;
+      
+      triggerNextQuestion(); // 重新開始一題
+      
+      const loop = (now) => {
+        if (!isRunning || isPaused) return;
+        const delta = now - lastLoopTime;
+        if (delta >= 1000) {
+          const addSec = Math.floor(delta / 1000);
+          timer += addSec;
+          lastLoopTime += addSec * 1000;
+          updateTimer();
+        }
+        if (now - lastStepTime >= stepInterval) {
+          playFootstep();
+          totalSteps++;
+          lastStepTime = now;
+          updateStats();
+        }
+        if (timer >= nextQuestionTime) {
+          triggerNextQuestion();
+        }
+        intervalId = requestAnimationFrame(loop);
+      };
+      intervalId = requestAnimationFrame(loop);
+
+      pauseBtn.disabled = false;
+      if (ytPlayer && ytPlayer.playVideo && musicEnabled) ytPlayer.playVideo();
+    }
+
+    function stopAll() {
+      clearTimers();
+      isRunning = false;
+      isPaused = false;
+      finalTimeStopEl.textContent = formatTime(timer);
+      finalStepsStopEl.textContent = totalSteps;
+      statsPanelStop.classList.add('show');
+      statsPanelPause.classList.remove('show');
+      startBtn.disabled = true;
+      pauseBtn.disabled = true;
+      stopBtn.disabled = true;
+      if (ytPlayer && ytPlayer.pauseVideo && musicEnabled) ytPlayer.pauseVideo();
+    }
+
+    function showRuleOverlay(text) {
+      ruleOverlayText.textContent = text;
+      ruleOverlay.classList.add('show');
+      setTimeout(() => { ruleOverlay.classList.remove('show'); }, 2000);
+    }
+
+    // --- 事件監聽 ---
+
+    musicBtn.onclick = () => {
+      musicEnabled = !musicEnabled;
+      if (musicEnabled) {
+        musicBtn.textContent = '🔇 關音樂';
+        musicBtn.classList.add('active');
+        if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+      } else {
+        musicBtn.textContent = '🎵 音樂';
+        musicBtn.classList.remove('active');
+        if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+      }
+    };
+
+    cadenceSlider.oninput = () => {
+      cadenceValue.textContent = cadenceSlider.value;
+      stepInterval = 60000 / parseInt(cadenceSlider.value, 10);
+    };
+
+    intervalSlider.oninput = () => {
+      intervalValue.textContent = intervalSlider.value + '秒';
+    };
+
+    levelRadios.forEach(r => {
+      r.addEventListener('change', () => {
+        currentLevel = parseInt(r.value, 10);
+        // 如果在反應模式中，立即刷新預覽（如果在跑的話會自動換）
+        if (!isRunning) {
+           animalContainer.innerHTML = '<div class="recall-prompt">準備</div>';
+        }
+      });
+    });
+
+    ruleRadios.forEach(r => {
+      r.addEventListener('change', () => {
+        currentRule = r.value;
+        if (currentRule === "REACTION") {
+          showRuleOverlay("反應訓練");
+          intervalLabel.textContent = "每題秒數";
+        } else {
+          showRuleOverlay("記憶訓練");
+          intervalLabel.textContent = "作答時間";
+        }
+        // 重置預覽
+        if(!isRunning) animalContainer.innerHTML = '<div class="recall-prompt">準備</div>';
+      });
+    });
+
+    startBtn.onclick = () => { if (!isRunning) startTimer(); };
+    pauseBtn.onclick = () => { pauseGame(); };
+    stopBtn.onclick = () => { if (isRunning || isPaused) stopAll(); };
+    restartBtn.onclick = () => { statsPanelStop.classList.remove('show'); startTimer(); };
+    pauseRestartBtn.onclick = () => { statsPanelPause.classList.remove('show'); startTimer(); };
+    resumeBtn.onclick = () => { resumeGame(); };
+
+  </script>
+</body>
+</html>
